@@ -316,7 +316,7 @@ function App({ gameStarted }) {
               </li>
             ))}
           </div>
-        </>
+        
       )}
     </div>
   );
@@ -370,6 +370,6 @@ export default function AppWrapper() {
         </div>
       )}
       <App gameStarted={gameStarted} />
-    </>
+    
   );
 }
