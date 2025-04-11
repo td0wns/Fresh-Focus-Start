@@ -1,4 +1,4 @@
-""import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VOWELS = ["A", "E", "I", "O", "U"];
@@ -206,4 +206,3 @@ function App({ gameStarted }) {
 }
 
 export default App;
-
