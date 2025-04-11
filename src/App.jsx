@@ -3,6 +3,8 @@ import React, { useEffect, useState, useRef } from "react";
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VOWELS = ["A", "E", "I", "O", "U"];
 const RARE_LETTERS = ["Q", "X", "Z", "J", "K"];
+const BANNED_WORDS = ["ASS", "ARSE", "DAMN", "DICK", "FUCK", "SHIT", "PISS", "BITCH", "CUNT", "TWAT"];
+
 const GRID_SIZE = 5;
 const TOTAL_TILES = GRID_SIZE * GRID_SIZE;
 
@@ -18,9 +20,9 @@ export default function App() {
   const [words, setWords] = useState([]);
   const [timer, setTimer] = useState(0);
   const inputRef = useRef(null);
+  const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
-    console.log("🟢 App mounted and working.");
     initializeGame();
   }, []);
 
@@ -94,6 +96,7 @@ export default function App() {
     setSelectedTiles([]);
     setWords([]);
     setWordInput("");
+    setFeedback("");
     setGamePhase("showPattern");
     startPatternAnimation(newPattern);
   };
@@ -111,18 +114,44 @@ export default function App() {
     }
   };
 
-  const handleWordSubmit = () => {
-    if (!wordInput.trim()) return;
-    const word = wordInput.trim().toUpperCase();
-    const valid = word.length >= 3;
-    const score = valid ? word.length * 5 : 0;
-    setWords([...words, { word, valid, score }]);
+  const isWordValid = async (word) => {
+    try {
+      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+      return res.ok;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  const handleWordSubmit = async () => {
+    const raw = wordInput.trim().toUpperCase();
+    if (!raw || BANNED_WORDS.includes(raw)) {
+      setFeedback("🚫 Banned or empty word.");
+      return;
+    }
+
+    // must include at least one revealed tile
+    const revealedLetters = selectedTiles.map(i => letters[i]);
+    if (!raw.split("").some(letter => revealedLetters.includes(letter))) {
+      setFeedback("❌ Word doesn't use any revealed letters.");
+      return;
+    }
+
+    const valid = await isWordValid(raw);
+    if (!valid) {
+      setFeedback("❌ Not a real word.");
+    } else {
+      setFeedback(`✅ "${raw}" accepted! +${raw.length * 5} points`);
+    }
+
+    setWords([...words, { word: raw, valid, score: valid ? raw.length * 5 : 0 }]);
     setWordInput("");
   };
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
       <h1 style={{ color: "#786daa" }}>Fresh <span style={{ color: "#84dade" }}>Focus</span></h1>
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem", marginBottom: "1rem" }}>
         {letters.map((letter, idx) => {
           const isRevealed = revealed[idx];
@@ -165,9 +194,12 @@ export default function App() {
           <button onClick={handleWordSubmit} style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
             Submit
           </button>
+          {feedback && <p style={{ marginTop: "0.5rem", fontWeight: "bold" }}>{feedback}</p>}
           <ul style={{ marginTop: "1rem" }}>
             {words.map((w, i) => (
-              <li key={i}>{w.word} {w.valid ? "✅" : "❌"}</li>
+              <li key={i}>
+                {w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}
+              </li>
             ))}
           </ul>
         </>
