@@ -111,6 +111,17 @@ function App({ gameStarted }) {
     const newSelected = [...selectedTiles, index];
     setRevealed(newRevealed);
     setSelectedTiles(newSelected);
+    
+    let tileScore = 0;
+    if (pattern.includes(index)) {
+      tileScore += 10;
+      const position = newSelected.length - 1;
+      if (pattern[position] === index) {
+        tileScore += 10; // correct order bonus
+      }
+    }
+    setPatternScore((prev) => prev + tileScore);
+
     if (newSelected.length === 5) {
       setGamePhase("enterWords");
       setTimer(30);
@@ -141,6 +152,18 @@ function App({ gameStarted }) {
     }
 
     const valid = await isWordValid(raw);
+
+    const patternLetters = selectedTiles.filter(i => pattern.includes(i)).map(i => letters[i]);
+    const nonPatternLetters = selectedTiles.filter(i => !pattern.includes(i)).map(i => letters[i]);
+
+    const usedPattern = [...new Set(word.split("").filter(l => patternLetters.includes(l)))];
+    const usedNonPattern = [...new Set(word.split("").filter(l => nonPatternLetters.includes(l)))];
+
+    let score = usedPattern.length * 10 + usedNonPattern.length * 5;
+    if (usedPattern.length === 5) {
+      score *= 2; // full pattern match bonus
+    }
+
     if (!valid) {
       setFeedback("❌ Not a real word.");
     } else {
