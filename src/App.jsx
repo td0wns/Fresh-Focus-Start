@@ -24,8 +24,6 @@ console.log("SUPABASE_ANON_KEY:", SUPABASE_ANON_KEY);
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
   const getRandomLetters = () => {
     const result = [];
     const weightedLetters = [];
