@@ -1,3 +1,6 @@
+"dependencies": {
+  "react-error-boundary": "^4.0.11"
+}
 import React, { useEffect, useState, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 
