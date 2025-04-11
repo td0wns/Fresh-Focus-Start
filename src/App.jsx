@@ -86,6 +86,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
     setRevealed(newRevealed);
     setSelectedTiles([...selectedTiles, index]);
   };
+console.log("Fresh rebuild - verifying env vars");
 
   return (
     <>
