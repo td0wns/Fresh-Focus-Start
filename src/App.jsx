@@ -17,7 +17,7 @@ const BANNED_WORDS = [
 const GRID_SIZE = 5;
 const TOTAL_TILES = GRID_SIZE * GRID_SIZE;
 
-function App({ gameStarted }) {
+function App() {
   const [letters, setLetters] = useState([]);
   const [pattern, setPattern] = useState([]);
   const [revealed, setRevealed] = useState([]);
@@ -31,11 +31,10 @@ function App({ gameStarted }) {
   const [wordScore, setWordScore] = useState(0);
   const inputRef = useRef(null);
   const [feedback, setFeedback] = useState("");
-  const [showStartModal, setShowStartModal] = useState(true);
 
   useEffect(() => {
-    if (gameStarted) initializeGame();
-  }, [gameStarted]);
+    initializeGame();
+  }, []);
 
   useEffect(() => {
     if (gamePhase === "enterWords" && timer > 0) {
@@ -172,46 +171,14 @@ function App({ gameStarted }) {
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
-      {showStartModal && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999
-        }}>
-          <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "1rem", maxWidth: "500px", textAlign: "left" }}>
-            <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>How to Play</h2>
-            <ul style={{ paddingLeft: "1.2rem" }}>
-              <li>Watch the pattern of 5 flashing tiles.</li>
-              <li>Repeat the pattern by clicking the tiles in order.</li>
-              <li>Use the revealed letters to make real words.</li>
-              <li>You score points based on pattern accuracy and valid words.</li>
-              <li>No repeats, no made-up or banned words allowed.</li>
-            </ul>
-            <button
-              onClick={() => { setShowStartModal(false); initializeGame(); }}
-              style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem" }}
-            >
-              Let's go!
-            </button>
-          </div>
-        </div>
-      )}
-
       <h1 style={{ color: "#786daa" }}>Fresh <span style={{ color: "#84dade" }}>Focus</span></h1>
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
           {letters.map((letter, idx) => {
             const isRevealed = revealed[idx];
             const isFlashing = flashingTile === idx;
-            const isPattern = pattern.includes(idx);
-            const backgroundColor = isFlashing ? "#fff" : isRevealed ? (isPattern ? "#84dade" : "#ddd") : "#786daa";
+            const isInPattern = pattern.includes(idx);
+            const backgroundColor = isFlashing ? "#fff" : isRevealed ? (isInPattern ? "#84dade" : "#ddd") : "#786daa";
             const color = isRevealed || isFlashing ? "#000" : "#fff";
             return (
               <div
@@ -224,7 +191,6 @@ function App({ gameStarted }) {
           })}
         </div>
       </div>
-
       {gamePhase === "enterWords" && (
         <>
           <p>⏱ Time Left: {timer}s</p>
