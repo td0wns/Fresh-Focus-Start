@@ -292,7 +292,7 @@ function App({ gameStarted }) {
   </div>
 )}
 
-            <summary style={{ cursor: "pointer", fontWeight: "bold" }}>Game Summary + New Game
+            <div style={{ cursor: "pointer", fontWeight: "bold" }}>Game Summary + New Game
             <div style={{ marginTop: "0.5rem", backgroundColor: "#f5f5f5", padding: "1rem", borderRadius: "8px" }}>
               <p><strong>Pattern Score:</strong> {patternScore}</p>
               <p><strong>Word Score:</strong> {wordScore}</p>
