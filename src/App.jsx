@@ -6,6 +6,14 @@ const VOWELS = ["A", "E", "I", "O", "U"];
 const RARE_LETTERS = ["Q", "X", "Z", "J", "K"];
 const GRID_SIZE = 5;
 const TOTAL_TILES = GRID_SIZE * GRID_SIZE;
+function ErrorFallback({ error }) {
+  return (
+    <div style={{ padding: "2rem", color: "red", fontFamily: "sans-serif" }}>
+      <h1>🚨 Something went wrong</h1>
+      <pre>{error.message}</pre>
+    </div>
+  );
+}
 
 function App() {
   const [showInstructions, setShowInstructions] = useState(true);
@@ -224,4 +232,15 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   );
 }
 
-export default App;
+import { ErrorBoundary } from 'react-error-boundary';
+
+function AppWrapper() {
+  return (
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <App />
+    </ErrorBoundary>
+  );
+}
+
+export default AppWrapper;
+
