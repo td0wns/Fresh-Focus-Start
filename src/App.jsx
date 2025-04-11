@@ -31,10 +31,11 @@ function App({ gameStarted }) {
   const [wordScore, setWordScore] = useState(0);
   const inputRef = useRef(null);
   const [feedback, setFeedback] = useState("");
+  const [showInstructions, setShowInstructions] = useState(true);
 
   useEffect(() => {
-    if (gameStarted) initializeGame();
-  }, [gameStarted]);
+    if (gameStarted && !showInstructions) initializeGame();
+  }, [gameStarted, showInstructions]);
 
   useEffect(() => {
     if (gamePhase === "enterWords" && timer > 0) {
@@ -165,12 +166,30 @@ function App({ gameStarted }) {
     if (usedPattern.length === 5) score *= 2;
     setWords(prev => [...prev, { word: raw, valid, score }]);
     if (valid) setWordScore(prev => prev + score);
-    setFeedback(valid ? `✅ \"${raw}\" accepted!` : "❌ Not a real word.");
+    setFeedback(valid ? `✅ "${raw}" accepted!` : "❌ Not a real word.");
     setWordInput("");
   };
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
+      {showInstructions && (
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "1rem", maxWidth: "500px", textAlign: "left" }}>
+            <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>How to Play</h2>
+            <ul>
+              <li>Watch the pattern of 5 flashing tiles.</li>
+              <li>Repeat it by clicking tiles in the correct order.</li>
+              <li>You earn 10 points for each correct tile and an additional 10 points if it's selected in the correct order.</li>
+              <li>After completing the pattern, use revealed letters to enter words.</li>
+              <li>Each letter from the pattern in your word gives 10 points; other revealed letters give 5 points.</li>
+              <li>If your word uses all 5 pattern letters, the word score is doubled.</li>
+              <li>No repeats or banned words allowed. Only real, valid words count.</li>
+            </ul>
+            <button onClick={() => setShowInstructions(false)} style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem" }}>Let’s go!</button>
+          </div>
+        </div>
+      )}
+
       <h1 style={{ color: "#786daa" }}>Fresh <span style={{ color: "#84dade" }}>Focus</span></h1>
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
