@@ -17,7 +17,7 @@ const BANNED_WORDS = [
 const GRID_SIZE = 5;
 const TOTAL_TILES = GRID_SIZE * GRID_SIZE;
 
-function App() {
+function App({ gameStarted }) {
   const [letters, setLetters] = useState([]);
   const [pattern, setPattern] = useState([]);
   const [revealed, setRevealed] = useState([]);
@@ -33,8 +33,8 @@ function App() {
   const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
-    initializeGame();
-  }, []);
+    if (gameStarted) initializeGame();
+  }, [gameStarted]);
 
   useEffect(() => {
     if (gamePhase === "enterWords" && timer > 0) {
@@ -177,8 +177,8 @@ function App() {
           {letters.map((letter, idx) => {
             const isRevealed = revealed[idx];
             const isFlashing = flashingTile === idx;
-            const isInPattern = pattern.includes(idx);
-            const backgroundColor = isFlashing ? "#fff" : isRevealed ? (isInPattern ? "#84dade" : "#ddd") : "#786daa";
+            const isPattern = pattern.includes(idx);
+            const backgroundColor = isFlashing ? "#fff" : isRevealed ? (isPattern ? "#84dade" : "#ddd") : "#786daa";
             const color = isRevealed || isFlashing ? "#000" : "#fff";
             return (
               <div
@@ -191,6 +191,7 @@ function App() {
           })}
         </div>
       </div>
+
       {gamePhase === "enterWords" && (
         <>
           <p>⏱ Time Left: {timer}s</p>
@@ -200,6 +201,24 @@ function App() {
           {feedback && <p style={{ fontWeight: "bold", marginTop: "0.5rem" }}>{feedback}</p>}
           <div style={{ marginTop: "1rem" }}>{words.map((w, i) => (<div key={i}>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>))}</div>
         </>
+      )}
+
+      {gamePhase === "enterWords" && timer === 0 && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
+          <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "1rem", maxWidth: "500px", textAlign: "left", fontFamily: "sans-serif" }}>
+            <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>Well done!</h2>
+            <ul style={{ paddingLeft: "1.2rem" }}>
+              <li>10 points per correct pattern tile, double if in correct order.</li>
+              <li>10 points per pattern letter in a word.</li>
+              <li>5 points per other revealed letter in a word.</li>
+              <li>Double word score if it uses all pattern letters.</li>
+            </ul>
+            <p style={{ marginTop: "1rem" }}><strong>Your Score:</strong> {patternScore + wordScore} (Pattern: {patternScore} | Words: {wordScore})</p>
+            <button onClick={() => window.location.reload()} style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem" }}>
+              Start New Game
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
