@@ -141,6 +141,10 @@ function App({ gameStarted }) {
   };
 
   const handleWordSubmit = async () => {
+    if (words.some(w => w.word === wordInput.trim().toUpperCase())) {
+      setFeedback("❌ Duplicate word.");
+      return;
+    }
     const raw = wordInput.trim().toUpperCase();
     if (!raw || BANNED_WORDS.includes(raw)) {
       setFeedback("🚫 Banned or empty word.");
@@ -226,13 +230,13 @@ function App({ gameStarted }) {
             Submit
           </button>
           {feedback && <p style={{ marginTop: "0.5rem", fontWeight: "bold" }}>{feedback}</p>}
-          <ul style={{ marginTop: "1rem" }}>
-            {words.map((w, i) => (
+          <div style={{ marginTop: "1rem", fontSize: "1rem", fontWeight: "bold" }}>
+            {words.length > 0 && (() => { const w = words[words.length - 1]; return (
               <li key={i}>
                 {w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}
               </li>
-            ))}
-          </ul>
+            )} )()}
+          </div>
         </>
       )}
     </div>
