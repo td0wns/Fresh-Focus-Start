@@ -24,8 +24,8 @@ function App() {
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
   const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-  console.log("SUPABASE_URL:", SUPABASE_URL);
-  console.log("SUPABASE_ANON_KEY:", SUPABASE_ANON_KEY);
+ const SUPABASE_URL = "https://uxobxjuwajzvcjveyrxe.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4b2J4anV3YWp6dmNqdmV5cnhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwNDExNTUsImV4cCI6MjA1OTYxNzE1NX0._HP4241yGwbu14uqWsdqcYFxUsIa0W5y-hO6fAUCiwk";
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
