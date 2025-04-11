@@ -8,7 +8,7 @@ const BANNED_WORDS = ["ASS", "ARSE", "DAMN", "DICK", "FUCK", "SHIT", "PISS", "BI
 const GRID_SIZE = 5;
 const TOTAL_TILES = GRID_SIZE * GRID_SIZE;
 
-export default function App() {
+function App() {
   const [letters, setLetters] = useState([]);
   const [pattern, setPattern] = useState([]);
   const [revealed, setRevealed] = useState([]);
@@ -195,7 +195,7 @@ export default function App() {
             Submit
           </button>
           {feedback && <p style={{ marginTop: "0.5rem", fontWeight: "bold" }}>{feedback}</p>}
-          <ul style={{ marginTop: "1rem" }}>
+          <p style={{ fontWeight: "bold", marginTop: "1rem" }}>{`Total Score: ${words.reduce((sum, w) => sum + (w.valid ? w.score : 0), 0)}`}</p><ul style={{ marginTop: "1rem" }}>
             {words.map((w, i) => (
               <li key={i}>
                 {w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}
@@ -205,5 +205,59 @@ export default function App() {
         </>
       )}
     </div>
+  );
+}
+
+
+import ReactDOM from "react-dom";
+
+export default function AppWrapper() {
+  const [showInstructions, setShowInstructions] = React.useState(true);
+
+  return (
+    <>
+      {showInstructions && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: "white",
+            padding: "2rem",
+            borderRadius: "1rem",
+            maxWidth: "400px",
+            textAlign: "center",
+            fontFamily: "sans-serif"
+          }}>
+            <h2 style={{ color: "#786daa" }}>How to Play</h2>
+            <p style={{ fontSize: "0.9rem", marginBottom: "1rem" }}>
+              You'll see a flashing pattern of 5 tiles.<br/>
+              Repeat the pattern by clicking the same tiles.<br/>
+              Then form as many real words as you can using the letters from those tiles.<br/>
+              Longer words = more points!
+            </p>
+            <button
+              onClick={() => setShowInstructions(false)}
+              style={{
+                backgroundColor: "#84dade",
+                color: "white",
+                padding: "0.5rem 1.5rem",
+                border: "none",
+                borderRadius: "0.5rem",
+                fontWeight: "bold"
+              }}
+            >
+              Let’s go!
+            </button>
+          </div>
+        </div>
+      )}
+      <App />
+    </>
   );
 }
