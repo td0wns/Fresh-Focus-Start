@@ -31,7 +31,7 @@ function App({ gameStarted }) {
   const [wordScore, setWordScore] = useState(0);
   const inputRef = useRef(null);
   const [feedback, setFeedback] = useState("");
-  const [showIntro, setShowIntro] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(true);
 
   useEffect(() => {
     if (gameStarted) initializeGame();
@@ -172,29 +172,20 @@ function App({ gameStarted }) {
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
-      {showIntro && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "rgba(0,0,0,0.6)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999
-        }}>
-          <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "1rem", maxWidth: "500px", textAlign: "center" }}>
-            <h2 style={{ color: "#786daa", marginBottom: "1rem" }}>How to Play</h2>
-            <ul style={{ textAlign: "left", paddingLeft: "1.2rem", marginBottom: "1rem" }}>
+      {showInstructions && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
+          <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "1rem", maxWidth: "500px", textAlign: "left" }}>
+            <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>How to Play</h2>
+            <ul style={{ paddingLeft: "1.2rem" }}>
               <li>Watch the pattern of 5 flashing tiles.</li>
-              <li>Repeat it by clicking the tiles in order.</li>
+              <li>Repeat the pattern by clicking the tiles in order.</li>
               <li>Use the revealed letters to make real words.</li>
               <li>You score points based on pattern accuracy and valid words.</li>
               <li>No repeats, no made-up or banned words allowed.</li>
             </ul>
-            <button onClick={() => setShowIntro(false)} style={{ padding: "0.75rem 1.5rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontSize: "1rem" }}>Let's go!</button>
+            <button onClick={() => setShowInstructions(false)} style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem" }}>
+              Let’s go!
+            </button>
           </div>
         </div>
       )}
@@ -205,8 +196,14 @@ function App({ gameStarted }) {
           {letters.map((letter, idx) => {
             const isRevealed = revealed[idx];
             const isFlashing = flashingTile === idx;
-            const isPattern = pattern.includes(idx);
-            const backgroundColor = isFlashing ? "#fff" : isRevealed ? (isPattern ? "#84dade" : "#ddd") : "#786daa";
+            const isInPattern = pattern.includes(idx);
+            const backgroundColor = isFlashing
+              ? "#fff"
+              : isRevealed && isInPattern
+              ? "#84dade"
+              : isRevealed
+              ? "#ddd"
+              : "#786daa";
             const color = isRevealed || isFlashing ? "#000" : "#fff";
             return (
               <div
@@ -229,42 +226,6 @@ function App({ gameStarted }) {
           {feedback && <p style={{ fontWeight: "bold", marginTop: "0.5rem" }}>{feedback}</p>}
           <div style={{ marginTop: "1rem" }}>{words.map((w, i) => (<div key={i}>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>))}</div>
         </>
-      )}
-
-      {gamePhase === "enterWords" && timer === 0 && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999
-        }}>
-          <div style={{
-            backgroundColor: "white",
-            padding: "2rem",
-            borderRadius: "1rem",
-            maxWidth: "500px",
-            textAlign: "left",
-            fontFamily: "sans-serif"
-          }}>
-            <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>Game Over</h2>
-            <p><strong>Your Score:</strong> {patternScore + wordScore} (Pattern: {patternScore} | Words: {wordScore})</p>
-            <p><strong>Words:</strong></p>
-            <ul>
-              {words.map((w, i) => (
-                <li key={i}>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</li>
-              ))}
-            </ul>
-            <button onClick={() => window.location.reload()} style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem" }}>
-              Start New Game
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );
