@@ -238,8 +238,61 @@ function App({ gameStarted }) {
             ))}
           </div>
 
-          <details style={{ marginTop: "2rem", fontSize: "0.9rem" }}>
-            <summary style={{ cursor: "pointer", fontWeight: "bold" }}>Game Summary + New Game</summary>
+          
+{timer === 0 && (
+  <div style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999
+  }}>
+    <div style={{
+      backgroundColor: "white",
+      padding: "2rem",
+      borderRadius: "1rem",
+      maxWidth: "500px",
+      textAlign: "left",
+      fontFamily: "sans-serif"
+    }}>
+      <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>Game Over</h2>
+      <p><strong>How to Play:</strong></p>
+      <ul style={{ paddingLeft: "1.2rem" }}>
+        <li>Watch the pattern of 5 flashing tiles.</li>
+        <li>Repeat it by clicking tiles in the correct order.</li>
+        <li>You earn <strong>10 points</strong> for each correct tile and an additional <strong>10 points</strong> if it's selected in the correct order.</li>
+        <li>After completing the pattern, use revealed letters to enter words.</li>
+        <li>Each letter from the pattern in your word gives <strong>10 points</strong>; other revealed letters give <strong>5 points</strong>.</li>
+        <li>If your word uses all 5 pattern letters, the word score is doubled.</li>
+        <li>No repeats or banned words allowed. Only real, valid words count.</li>
+      </ul>
+      <p style={{ marginTop: "1rem" }}><strong>Your Score:</strong> {patternScore + wordScore} (Pattern: {patternScore} | Words: {wordScore})</p>
+      <button
+        onClick={() => window.location.reload()}
+        style={{
+          marginTop: "1rem",
+          width: "100%",
+          padding: "0.75rem",
+          backgroundColor: "#84dade",
+          color: "white",
+          border: "none",
+          borderRadius: "0.5rem",
+          fontWeight: "bold",
+          fontSize: "1rem"
+        }}
+      >
+        Start New Game
+      </button>
+    </div>
+  </div>
+)}
+
+            <summary style={{ cursor: "pointer", fontWeight: "bold" }}>Game Summary + New Game
             <div style={{ marginTop: "0.5rem", backgroundColor: "#f5f5f5", padding: "1rem", borderRadius: "8px" }}>
               <p><strong>Pattern Score:</strong> {patternScore}</p>
               <p><strong>Word Score:</strong> {wordScore}</p>
@@ -254,7 +307,7 @@ function App({ gameStarted }) {
                 New Game
               </button>
             </div>
-          </details>
+          
 
           <div style={{ marginTop: "1rem" }}>
             {words.map((w, i) => (
