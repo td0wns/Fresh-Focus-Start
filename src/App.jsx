@@ -35,9 +35,7 @@ function App({ gameStarted }) {
   const [timer, setTimer] = useState(0);
   const [patternScore, setPatternScore] = useState(0);
   const [wordScore, setWordScore] = useState(0);
-  const [playerName, setPlayerName] = useState("");
-  const [showScoreModal, setShowScoreModal] = useState(false);
-  const [leaderboard, setLeaderboard] = useState([]);
+  const [topScore, setTopScore] = useState(null);
   const inputRef = useRef(null);
   const [feedback, setFeedback] = useState("");
 
@@ -51,8 +49,7 @@ function App({ gameStarted }) {
         setTimer((prev) => {
           if (prev <= 1) {
             clearInterval(interval);
-            setShowScoreModal(true);
-            fetchLeaderboard();
+            handleGameEnd();
             return 0;
           }
           return prev - 1;
@@ -103,7 +100,9 @@ function App({ gameStarted }) {
         index++;
       } else {
         clearInterval(interval);
-        setTimeout(() => setGamePhase("selectTiles"), 500);
+        setTimeout(() => {
+          setGamePhase("selectTiles");
+        }, 500);
       }
     }, 800);
   };
@@ -120,7 +119,7 @@ function App({ gameStarted }) {
     setFeedback("");
     setPatternScore(0);
     setWordScore(0);
-    setShowScoreModal(false);
+    setTopScore(null);
     setGamePhase("showPattern");
     startPatternAnimation(newPattern);
   };
@@ -179,17 +178,13 @@ function App({ gameStarted }) {
     setWordInput("");
   };
 
-  const submitScore = async () => {
-    if (!playerName.trim()) return;
-    await supabase.from("leaderboard").insert({
-      player_name: playerName.trim(),
-      score: patternScore + wordScore,
-    });
-  };
-
-  const fetchLeaderboard = async () => {
-    const { data } = await supabase.from("leaderboard").select("player_name, score").order("score", { ascending: false }).limit(10);
-    setLeaderboard(data || []);
+  const handleGameEnd = async () => {
+    const totalScore = patternScore + wordScore;
+    await supabase.from("scores").insert([{ score: totalScore }]);
+    const { data, error } = await supabase.from("scores").select("score").order("score", { ascending: false }).limit(1);
+    if (data && data.length > 0) {
+      setTopScore(data[0].score);
+    }
   };
 
   return (
@@ -200,8 +195,8 @@ function App({ gameStarted }) {
           {letters.map((letter, idx) => {
             const isRevealed = revealed[idx];
             const isFlashing = flashingTile === idx;
-            const isInPattern = pattern.includes(idx);
-            const backgroundColor = isFlashing ? "#fff" : isRevealed ? (isInPattern ? "#84dade" : "#ddd") : "#786daa";
+            const isPattern = pattern.includes(idx);
+            const backgroundColor = isFlashing ? "#fff" : isRevealed ? (isPattern ? "#84dade" : "#ddd") : "#786daa";
             const color = isRevealed || isFlashing ? "#000" : "#fff";
             return (
               <div
@@ -226,32 +221,19 @@ function App({ gameStarted }) {
         </>
       )}
 
-      {showScoreModal && (
+      {gamePhase === "enterWords" && timer === 0 && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
           <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "1rem", maxWidth: "500px", textAlign: "left" }}>
             <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>Well done!</h2>
+            <p><strong>Scoring system:</strong></p>
+            <ul style={{ paddingLeft: "1.2rem" }}>
+              <li>Each correct pattern tile: 10 pts + 10 bonus if in correct order.</li>
+              <li>Words: 10 pts for each pattern letter, 5 pts for other revealed letters.</li>
+              <li>Double points if your word uses all 5 pattern letters.</li>
+            </ul>
             <p><strong>Your Score:</strong> {patternScore + wordScore}</p>
-            <p><strong>Scoring:</strong></p>
-            <ul>
-              <li>Each pattern tile: +10 pts</li>
-              <li>Correct order bonus: +10 pts each</li>
-              <li>Word pattern letter: +10 pts</li>
-              <li>Word non-pattern letter: +5 pts</li>
-              <li>All 5 pattern letters in one word = 2x multiplier</li>
-            </ul>
-            <input placeholder="Your name" value={playerName} onChange={(e) => setPlayerName(e.target.value)} style={{ padding: "0.5rem", width: "100%", marginTop: "1rem" }} />
-            <button onClick={submitScore} style={{ width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem", marginTop: "1rem" }}>
-              Submit Score
-            </button>
-            <h3 style={{ marginTop: "2rem" }}>Leaderboard</h3>
-            <ul>
-              {leaderboard.map((entry, i) => (
-                <li key={i}>{entry.player_name || "Anonymous"} — {entry.score} pts</li>
-              ))}
-            </ul>
-            <button onClick={() => window.location.reload()} style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#786daa", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold" }}>
-              New Game
-            </button>
+            {topScore !== null && <p><strong>Top Score:</strong> {topScore}</p>}
+            <button onClick={() => window.location.reload()} style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem" }}>Start New Game</button>
           </div>
         </div>
       )}
