@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VOWELS = ["A", "E", "I", "O", "U"];
@@ -16,13 +16,18 @@ function App() {
   const [flashingTile, setFlashingTile] = useState(null);
   const [gamePhase, setGamePhase] = useState("waiting");
 
- const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const [wordInput, setWordInput] = useState("");
+  const [words, setWords] = useState([]);
+  const [timer, setTimer] = useState(0);
+  const inputRef = useRef(null);
 
-console.log("SUPABASE_URL:", SUPABASE_URL);
-console.log("SUPABASE_ANON_KEY:", SUPABASE_ANON_KEY);
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+  const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  console.log("SUPABASE_URL:", SUPABASE_URL);
+  console.log("SUPABASE_ANON_KEY:", SUPABASE_ANON_KEY);
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const getRandomLetters = () => {
     const result = [];
@@ -77,6 +82,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     setPattern(newPattern);
     setRevealed(Array(TOTAL_TILES).fill(false));
     setSelectedTiles([]);
+    setWords([]);
+    setWordInput("");
     setGamePhase("showPattern");
     startPatternAnimation(newPattern);
   };
@@ -86,9 +93,38 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const newRevealed = [...revealed];
     newRevealed[index] = true;
     setRevealed(newRevealed);
-    setSelectedTiles([...selectedTiles, index]);
+    const newSelected = [...selectedTiles, index];
+    setSelectedTiles(newSelected);
+
+    if (newSelected.length === 5) {
+      setGamePhase("enterWords");
+      setTimer(30);
+    }
   };
-console.log("Fresh rebuild - verifying env vars");
+
+  const handleWordSubmit = () => {
+    if (!wordInput.trim()) return;
+    const word = wordInput.trim().toUpperCase();
+    const valid = word.length >= 3;
+    const score = valid ? word.length * 5 : 0;
+    setWords([...words, { word, valid, score }]);
+    setWordInput("");
+  };
+
+  useEffect(() => {
+    if (gamePhase === "enterWords" && timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [gamePhase, timer]);
 
   return (
     <>
@@ -113,79 +149,79 @@ console.log("Fresh rebuild - verifying env vars");
           <span style={{ color: '#786daa' }}>Fresh </span>
           <span style={{ color: '#84dade' }}>Focus</span>
         </h1>
-     <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}> 
-  {letters.map((letter, idx) => {
-    const isRevealed = revealed[idx];
-    const isFlashing = flashingTile === idx;
-    const backgroundColor = isFlashing ? "#ffffff" : isRevealed ? "#dedede" : "#786daa";
-    const color = isRevealed || isFlashing ? "black" : "white";
-    return (
-      <div
-        key={idx}
-        onClick={() => handleTileClick(idx)}
-        style={{
-          backgroundColor,
-          color,
-          width: 60,
-          height: 60,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 24,
-          borderRadius: 8,
-          cursor: gamePhase === "selectTiles" && !revealed[idx] ? "pointer" : "default"
-        }}
-      >
-        {isRevealed || isFlashing ? letter : ""}
-      </div>
-    );
-  })}
-</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
+          {letters.map((letter, idx) => {
+            const isRevealed = revealed[idx];
+            const isFlashing = flashingTile === idx;
+            const backgroundColor = isFlashing ? "#ffffff" : isRevealed ? "#dedede" : "#786daa";
+            const color = isRevealed || isFlashing ? "black" : "white";
+            return (
+              <div
+                key={idx}
+                onClick={() => handleTileClick(idx)}
+                style={{
+                  backgroundColor,
+                  color,
+                  width: 60,
+                  height: 60,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 24,
+                  borderRadius: 8,
+                  cursor: gamePhase === "selectTiles" && !revealed[idx] ? "pointer" : "default"
+                }}
+              >
+                {isRevealed || isFlashing ? letter : ""}
+              </div>
+            );
+          })}
+        </div>
 
-{gamePhase === "enterWords" && (
-  <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
-    <p>⏱ Time Left: {timer}s</p>
-    <input
-      ref={inputRef}
-      value={wordInput}
-      onChange={(e) => setWordInput(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && handleWordSubmit()}
-      placeholder="Enter a word"
-      style={{
-        padding: "0.5rem",
-        borderRadius: "0.25rem",
-        border: "1px solid #ccc",
-        marginBottom: "0.5rem"
-      }}
-    />
-    <br />
-    <button
-      onClick={handleWordSubmit}
-      style={{
-        backgroundColor: "#84dade",
-        color: "white",
-        padding: "0.5rem 1rem",
-        border: "none",
-        borderRadius: "0.25rem"
-      }}
-    >
-      Submit Word
-    </button>
-    <div style={{ marginTop: "1rem" }}>
-      <h3>Words:</h3>
-      <ul>
-        {words.map((w, idx) => (
-          <li key={idx}>
-            {w.word} {w.valid ? "✅" : "❌"}
-          </li>
-        ))}
-      </ul>
-    </div>
-  </div>
-)}
-</div>
-</>
-);
+        {gamePhase === "enterWords" && (
+          <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+            <p>⏱ Time Left: {timer}s</p>
+            <input
+              ref={inputRef}
+              value={wordInput}
+              onChange={(e) => setWordInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleWordSubmit()}
+              placeholder="Enter a word"
+              style={{
+                padding: "0.5rem",
+                borderRadius: "0.25rem",
+                border: "1px solid #ccc",
+                marginBottom: "0.5rem"
+              }}
+            />
+            <br />
+            <button
+              onClick={handleWordSubmit}
+              style={{
+                backgroundColor: "#84dade",
+                color: "white",
+                padding: "0.5rem 1rem",
+                border: "none",
+                borderRadius: "0.25rem"
+              }}
+            >
+              Submit Word
+            </button>
+            <div style={{ marginTop: "1rem" }}>
+              <h3>Words:</h3>
+              <ul>
+                {words.map((w, idx) => (
+                  <li key={idx}>
+                    {w.word} {w.valid ? "✅" : "❌"}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
 }
 
 export default App;
