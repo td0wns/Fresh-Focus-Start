@@ -321,6 +321,5 @@ function App({ gameStarted }) {
     </div>
   );
 }
-      </div>
 
 export default App;
