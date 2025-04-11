@@ -4,18 +4,13 @@ const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VOWELS = ["A", "E", "I", "O", "U"];
 const RARE_LETTERS = ["Q", "X", "Z", "J", "K"];
 const BANNED_WORDS = [
-  // General profanity
   "ASS", "ARSE", "DAMN", "DICK", "FUCK", "SHIT", "PISS", "BITCH", "CUNT", "TWAT", "CRAP", "HELL",
-
-  // Sexual and vulgar terms
   "SEX", "SEXY", "HORNY", "PENIS", "VAGINA", "CLIT", "DILDO", "BJ", "BOOB", "BOOBS", "CUM",
   "JIZZ", "RIMJOB", "HANDJOB", "BLOWJOB", "SCREW", "HUMP", "FELLATIO", "CUNNILINGUS", "GENITAL",
   "NUDE", "XXX", "ORGASM", "ANAL", "BDSM", "FAP", "MOAN", "NIPPLE",
-
-  // Racial slurs (Note: listed here for filtering purposes only)
-  "NIGGER", "NEGRO", "CHINK", "SPIC", "KIKE", "K*KE", "JUNGLEBUNNY", "TARBABY", "WETBACK", 
-  "FAGGOT", "FAG", "DYKE", "GOOK", "TRANNY", "HEEB", "GYPPY", "GYPO", "MUZZIE", "MUZZY", 
-  "ZIONIST", "ISLAMOPHOBE", "NAZI", "HONKEY", "CRACKER", "BINT", "BOLLOCKS", "SLUT", 
+  "NIGGER", "NEGRO", "CHINK", "SPIC", "KIKE", "K*KE", "JUNGLEBUNNY", "TARBABY", "WETBACK",
+  "FAGGOT", "FAG", "DYKE", "GOOK", "TRANNY", "HEEB", "GYPPY", "GYPO", "MUZZIE", "MUZZY",
+  "ZIONIST", "ISLAMOPHOBE", "NAZI", "HONKEY", "CRACKER", "BINT", "BOLLOCKS", "SLUT",
   "SKANK", "WHORE", "HO", "TRAMP", "HAG", "BROAD"
 ];
 
@@ -47,7 +42,7 @@ function App({ gameStarted }) {
   useEffect(() => {
     if (gamePhase === "enterWords" && timer > 0) {
       const interval = setInterval(() => {
-        setTimer((prev) => {
+        setTimer(prev => {
           if (prev <= 1) {
             clearInterval(interval);
             return 0;
@@ -199,147 +194,38 @@ function App({ gameStarted }) {
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
       <h1 style={{ color: "#786daa" }}>Fresh <span style={{ color: "#84dade" }}>Focus</span></h1>
-    <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
-  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
-    {letters.map((letter, idx) => {
-      const isRevealed = revealed[idx];
-      const isFlashing = flashingTile === idx;
-      const backgroundColor = isFlashing ? "#fff" : isRevealed ? "#ddd" : "#786daa";
-      const color = isRevealed || isFlashing ? "#000" : "#fff";
-      return (
-        <div
-          key={idx}
-          onClick={() => handleTileClick(idx)}
-          style={{
-            backgroundColor,
-            color,
-            width: 60,
-            height: 60,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: 20,
-            borderRadius: 8,
-            cursor: "pointer"
-          }}
-        >
-          {isRevealed || isFlashing ? letter : ""}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
+          {letters.map((letter, idx) => {
+            const isRevealed = revealed[idx];
+            const isFlashing = flashingTile === idx;
+            const backgroundColor = isFlashing ? "#fff" : isRevealed ? "#ddd" : "#786daa";
+            const color = isRevealed || isFlashing ? "#000" : "#fff";
+            return (
+              <div
+                key={idx}
+                onClick={() => handleTileClick(idx)}
+                style={{
+                  backgroundColor,
+                  color,
+                  width: 60,
+                  height: 60,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontSize: 20,
+                  borderRadius: 8,
+                  cursor: "pointer"
+                }}
+              >
+                {isRevealed || isFlashing ? letter : ""}
+              </div>
+            );
+          })}
         </div>
-      );
-    })}
-  </div>
-</
-
-        {letters.map((letter, idx) => {
-          const isRevealed = revealed[idx];
-          const isFlashing = flashingTile === idx;
-          const backgroundColor = isFlashing ? "#fff" : isRevealed ? "#ddd" : "#786daa";
-          const color = isRevealed || isFlashing ? "#000" : "#fff";
-          return (
-            <div
-              key={idx}
-              onClick={() => handleTileClick(idx)}
-              style={{
-                backgroundColor,
-                color,
-                width: 60,
-                height: 60,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                fontSize: 20,
-                borderRadius: 8,
-                cursor: "pointer"
-              }}
-            >
-              {isRevealed || isFlashing ? letter : ""}
-            </div>
-          );
-        })}
       </div>
-
-      {gamePhase === "enterWords" && (
-        <>
-          <p>⏱ Time Left: {timer}s</p>
-          <p style={{ fontWeight: "bold" }}>
-            Pattern Score: {patternScore} | Word Score: {wordScore} | Total: {patternScore + wordScore}
-          </p>
-          <input
-            ref={inputRef}
-            value={wordInput}
-            onChange={(e) => setWordInput(e.target.value)}
-            placeholder="Enter a word"
-            onKeyDown={(e) => e.key === 'Enter' && handleWordSubmit()}
-            style={{ padding: "0.5rem", width: "200px" }}
-          />
-          <button onClick={handleWordSubmit} style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
-            Submit
-          </button>
-          
-          {feedback && <p style={{ marginTop: "0.5rem", fontWeight: "bold" }}>{feedback}</p>}
-          <div style={{ marginTop: "1rem" }}>
-            {words.map((w, i) => (
-              <div>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>
-            ))}
-          </div>
-
-          
-      {timer === 0 && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999
-        }}>
-          <div style={{
-            backgroundColor: "white",
-            padding: "2rem",
-            borderRadius: "1rem",
-            maxWidth: "500px",
-            textAlign: "left",
-            fontFamily: "sans-serif"
-          }}>
-            <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>Game Over</h2>
-            <p><strong>How to Play:</strong></p>
-            <ul style={{ paddingLeft: "1.2rem" }}>
-              <li>Watch the pattern of 5 flashing tiles.</li>
-              <li>Repeat it by clicking tiles in the correct order.</li>
-              <li>You earn <strong>10 points</strong> for each correct tile and an additional <strong>10 points</strong> if it's selected in the correct order.</li>
-              <li>After completing the pattern, use revealed letters to enter words.</li>
-              <li>Each letter from the pattern in your word gives <strong>10 points</strong>; other revealed letters give <strong>5 points</strong>.</li>
-              <li>If your word uses all 5 pattern letters, the word score is doubled.</li>
-              <li>No repeats or banned words allowed. Only real, valid words count.</li>
-            </ul>
-            <p style={{ marginTop: "1rem" }}><strong>Your Score:</strong> {patternScore + wordScore} (Pattern: {patternScore} | Words: {wordScore})</p>
-            <button
-              onClick={() => window.location.reload()}
-              style={{
-                marginTop: "1rem",
-                width: "100%",
-                padding: "0.75rem",
-                backgroundColor: "#84dade",
-                color: "white",
-                border: "none",
-                borderRadius: "0.5rem",
-                fontWeight: "bold",
-                fontSize: "1rem"
-              }}
-            >
-              Start New Game
-            </button>
-          </div>
-        </div>
-      )}
-    </>
-  )}
-</div>
-);
+    </div>
+  );
 }
 
 export default App;
