@@ -308,7 +308,6 @@ function App({ gameStarted }) {
               </button>
             </div>
           
-
           <div style={{ marginTop: "1rem" }}>
             {words.map((w, i) => (
               <li key={i}>
