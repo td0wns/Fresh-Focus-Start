@@ -108,37 +108,79 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
           <span style={{ color: '#786daa' }}>Fresh </span>
           <span style={{ color: '#84dade' }}>Focus</span>
         </h1>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
-          {letters.map((letter, idx) => {
-            const isRevealed = revealed[idx];
-            const isFlashing = flashingTile === idx;
-            const backgroundColor = isFlashing ? "#ffffff" : isRevealed ? "#dedede" : "#786daa";
-            const color = isRevealed || isFlashing ? "black" : "white";
-            return (
-              <div
-                key={idx}
-                onClick={() => handleTileClick(idx)}
-                style={{
-                  backgroundColor,
-                  color,
-                  width: 60,
-                  height: 60,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 24,
-                  borderRadius: 8,
-                  cursor: gamePhase === "selectTiles" && !revealed[idx] ? "pointer" : "default"
-                }}
-              >
-                {isRevealed || isFlashing ? letter : ""}
-              </div>
-            );
-          })}
-        </div>
+     <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}> 
+  {letters.map((letter, idx) => {
+    const isRevealed = revealed[idx];
+    const isFlashing = flashingTile === idx;
+    const backgroundColor = isFlashing ? "#ffffff" : isRevealed ? "#dedede" : "#786daa";
+    const color = isRevealed || isFlashing ? "black" : "white";
+    return (
+      <div
+        key={idx}
+        onClick={() => handleTileClick(idx)}
+        style={{
+          backgroundColor,
+          color,
+          width: 60,
+          height: 60,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 24,
+          borderRadius: 8,
+          cursor: gamePhase === "selectTiles" && !revealed[idx] ? "pointer" : "default"
+        }}
+      >
+        {isRevealed || isFlashing ? letter : ""}
       </div>
-    </>
-  );
+    );
+  })}
+</div>
+
+{gamePhase === "enterWords" && (
+  <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+    <p>⏱ Time Left: {timer}s</p>
+    <input
+      ref={inputRef}
+      value={wordInput}
+      onChange={(e) => setWordInput(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && handleWordSubmit()}
+      placeholder="Enter a word"
+      style={{
+        padding: "0.5rem",
+        borderRadius: "0.25rem",
+        border: "1px solid #ccc",
+        marginBottom: "0.5rem"
+      }}
+    />
+    <br />
+    <button
+      onClick={handleWordSubmit}
+      style={{
+        backgroundColor: "#84dade",
+        color: "white",
+        padding: "0.5rem 1rem",
+        border: "none",
+        borderRadius: "0.25rem"
+      }}
+    >
+      Submit Word
+    </button>
+    <div style={{ marginTop: "1rem" }}>
+      <h3>Words:</h3>
+      <ul>
+        {words.map((w, idx) => (
+          <li key={idx}>
+            {w.word} {w.valid ? "✅" : "❌"}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+)}
+</div>
+</>
+);
 }
 
 export default App;
