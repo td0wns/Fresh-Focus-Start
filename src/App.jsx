@@ -224,6 +224,7 @@ function App({ gameStarted }) {
             value={wordInput}
             onChange={(e) => setWordInput(e.target.value)}
             placeholder="Enter a word"
+            onKeyDown={(e) => e.key === 'Enter' && handleWordSubmit()}
             style={{ padding: "0.5rem", width: "200px" }}
           />
           <button onClick={handleWordSubmit} style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
