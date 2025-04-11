@@ -208,10 +208,10 @@ function App({ gameStarted }) {
               }}
             >
               {isRevealed || isFlashing ? letter : ""}
-            </div>
+            </ul>
           );
         })}
-      </div>
+      </ul>
 
       {gamePhase === "enterWords" && (
         <>
@@ -232,11 +232,11 @@ function App({ gameStarted }) {
           </button>
           
           {feedback && <p style={{ marginTop: "0.5rem", fontWeight: "bold" }}>{feedback}</p>}
-          <div style={{ marginTop: "1rem" }}>
+          <ul style={{ marginTop: "1rem" }}>
             {words.map((w, i) => (
-              <div>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>
+              <div>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</ul>
             ))}
-          </div>
+          </ul>
 
           <details style={{ marginTop: "2rem", fontSize: "0.9rem" }}>
             <summary style={{ cursor: "pointer", fontWeight: "bold" }}>Game Summary + New Game</summary>
@@ -249,23 +249,23 @@ function App({ gameStarted }) {
                 {words.filter(w => w.valid).map((w, i) => (
                   <li key={i}>{w.word} (+{w.score})</li>
                 ))}
-              </div>
+              </ul>
               <button onClick={() => window.location.reload()} style={{ marginTop: "1rem", padding: "0.5rem 1rem", backgroundColor: "#786daa", color: "white", border: "none", borderRadius: "6px" }}>
                 New Game
               </button>
-            </div>
+            </ul>
           </details>
 
-          <div style={{ marginTop: "1rem" }}>
+          <ul style={{ marginTop: "1rem" }}>
             {words.map((w, i) => (
               <li key={i}>
                 {w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}
               </li>
             ))}
-          </div>
+          </ul>
         </>
       )}
-    </div>
+    </ul>
   );
 }
 
@@ -313,8 +313,8 @@ export default function AppWrapper() {
             >
               Let’s go!
             </button>
-          </div>
-        </div>
+          </ul>
+        </ul>
       )}
       <App gameStarted={gameStarted} />
     </>
