@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+""import React, { useEffect, useState, useRef } from "react";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VOWELS = ["A", "E", "I", "O", "U"];
@@ -8,9 +8,9 @@ const BANNED_WORDS = [
   "SEX", "SEXY", "HORNY", "PENIS", "VAGINA", "CLIT", "DILDO", "BJ", "BOOB", "BOOBS", "CUM",
   "JIZZ", "RIMJOB", "HANDJOB", "BLOWJOB", "SCREW", "HUMP", "FELLATIO", "CUNNILINGUS", "GENITAL",
   "NUDE", "XXX", "ORGASM", "ANAL", "BDSM", "FAP", "MOAN", "NIPPLE",
-  "NIGGER", "NEGRO", "CHINK", "SPIC", "KIKE", "K*KE", "JUNGLEBUNNY", "TARBABY", "WETBACK",
-  "FAGGOT", "FAG", "DYKE", "GOOK", "TRANNY", "HEEB", "GYPPY", "GYPO", "MUZZIE", "MUZZY",
-  "ZIONIST", "ISLAMOPHOBE", "NAZI", "HONKEY", "CRACKER", "BINT", "BOLLOCKS", "SLUT",
+  "NIGGER", "NEGRO", "CHINK", "SPIC", "KIKE", "K*KE", "JUNGLEBUNNY", "TARBABY", "WETBACK", 
+  "FAGGOT", "FAG", "DYKE", "GOOK", "TRANNY", "HEEB", "GYPPY", "GYPO", "MUZZIE", "MUZZY", 
+  "ZIONIST", "ISLAMOPHOBE", "NAZI", "HONKEY", "CRACKER", "BINT", "BOLLOCKS", "SLUT", 
   "SKANK", "WHORE", "HO", "TRAMP", "HAG", "BROAD"
 ];
 
@@ -24,7 +24,6 @@ function App({ gameStarted }) {
   const [selectedTiles, setSelectedTiles] = useState([]);
   const [flashingTile, setFlashingTile] = useState(null);
   const [gamePhase, setGamePhase] = useState("waiting");
-
   const [wordInput, setWordInput] = useState("");
   const [words, setWords] = useState([]);
   const [timer, setTimer] = useState(0);
@@ -34,15 +33,13 @@ function App({ gameStarted }) {
   const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
-    if (gameStarted) {
-      initializeGame();
-    }
+    if (gameStarted) initializeGame();
   }, [gameStarted]);
 
   useEffect(() => {
     if (gamePhase === "enterWords" && timer > 0) {
       const interval = setInterval(() => {
-        setTimer(prev => {
+        setTimer((prev) => {
           if (prev <= 1) {
             clearInterval(interval);
             return 0;
@@ -95,7 +92,9 @@ function App({ gameStarted }) {
         index++;
       } else {
         clearInterval(interval);
-        setGamePhase("selectTiles");
+        setTimeout(() => {
+          setGamePhase("selectTiles");
+        }, 500);
       }
     }, 800);
   };
@@ -121,23 +120,20 @@ function App({ gameStarted }) {
     const newRevealed = [...revealed];
     newRevealed[index] = true;
     const newSelected = [...selectedTiles, index];
-
     let tileScore = 0;
     if (pattern.includes(index)) {
       tileScore += 10;
       const position = newSelected.length - 1;
-      if (pattern[position] === index) {
-        tileScore += 10;
-      }
+      if (pattern[position] === index) tileScore += 10;
     }
-
     setRevealed(newRevealed);
     setSelectedTiles(newSelected);
-    setPatternScore(prev => prev + tileScore);
-
+    setPatternScore((prev) => prev + tileScore);
     if (newSelected.length === 5) {
-      setGamePhase("enterWords");
-      setTimer(30);
+      setTimeout(() => {
+        setGamePhase("enterWords");
+        setTimer(30);
+      }, 500);
     }
   };
 
@@ -145,49 +141,31 @@ function App({ gameStarted }) {
     try {
       const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
       return res.ok;
-    } catch (err) {
+    } catch {
       return false;
     }
   };
 
   const handleWordSubmit = async () => {
-    if (words.some(w => w.word === wordInput.trim().toUpperCase())) {
-      setFeedback("❌ Duplicate word.");
-      return;
-    }
     const raw = wordInput.trim().toUpperCase();
-    if (!raw || BANNED_WORDS.includes(raw)) {
-      setFeedback("🚫 Banned or empty word.");
+    if (!raw || BANNED_WORDS.includes(raw) || words.some(w => w.word === raw)) {
+      setFeedback("❌ Invalid or duplicate word.");
       return;
     }
-
     const patternLetters = selectedTiles.filter(i => pattern.includes(i)).map(i => letters[i]);
     const nonPatternLetters = selectedTiles.filter(i => !pattern.includes(i)).map(i => letters[i]);
-
     const usedPattern = [...new Set(raw.split("").filter(l => patternLetters.includes(l)))];
     const usedNonPattern = [...new Set(raw.split("").filter(l => nonPatternLetters.includes(l)))];
-
     if (usedPattern.length === 0 && usedNonPattern.length === 0) {
       setFeedback("❌ Word doesn't use any revealed letters.");
       return;
     }
-
     const valid = await isWordValid(raw);
-    if (!valid) {
-      setFeedback("❌ Not a real word.");
-    } else {
-      setFeedback(`✅ "${raw}" accepted!`);
-    }
-
     let score = usedPattern.length * 10 + usedNonPattern.length * 5;
-    if (usedPattern.length === 5) {
-      score *= 2;
-    }
-
+    if (usedPattern.length === 5) score *= 2;
     setWords(prev => [...prev, { word: raw, valid, score }]);
-    if (valid) {
-      setWordScore(prev => prev + score);
-    }
+    if (valid) setWordScore(prev => prev + score);
+    setFeedback(valid ? `✅ \"${raw}\" accepted!` : "❌ Not a real word.");
     setWordInput("");
   };
 
@@ -205,27 +183,27 @@ function App({ gameStarted }) {
               <div
                 key={idx}
                 onClick={() => handleTileClick(idx)}
-                style={{
-                  backgroundColor,
-                  color,
-                  width: 60,
-                  height: 60,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontSize: 20,
-                  borderRadius: 8,
-                  cursor: "pointer"
-                }}
-              >
+                style={{ backgroundColor, color, width: 60, height: 60, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, borderRadius: 8, cursor: "pointer" }}>
                 {isRevealed || isFlashing ? letter : ""}
               </div>
             );
           })}
         </div>
       </div>
+
+      {gamePhase === "enterWords" && (
+        <>
+          <p>⏱ Time Left: {timer}s</p>
+          <p><strong>Pattern Score:</strong> {patternScore} | <strong>Word Score:</strong> {wordScore} | <strong>Total:</strong> {patternScore + wordScore}</p>
+          <input ref={inputRef} value={wordInput} onChange={(e) => setWordInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleWordSubmit()} placeholder="Enter a word" style={{ padding: "0.5rem", width: "200px" }} />
+          <button onClick={handleWordSubmit} style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>Submit</button>
+          {feedback && <p style={{ fontWeight: "bold", marginTop: "0.5rem" }}>{feedback}</p>}
+          <div style={{ marginTop: "1rem" }}>{words.map((w, i) => (<div key={i}>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>))}</div>
+        </>
+      )}
     </div>
   );
 }
 
 export default App;
+
