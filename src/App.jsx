@@ -8,13 +8,14 @@ const BANNED_WORDS = ["ASS", "ARSE", "DAMN", "DICK", "FUCK", "SHIT", "PISS", "BI
 const GRID_SIZE = 5;
 const TOTAL_TILES = GRID_SIZE * GRID_SIZE;
 
-function App() {
+function App({ onGameStart }) {
   const [letters, setLetters] = useState([]);
   const [pattern, setPattern] = useState([]);
   const [revealed, setRevealed] = useState([]);
   const [selectedTiles, setSelectedTiles] = useState([]);
   const [flashingTile, setFlashingTile] = useState(null);
   const [gamePhase, setGamePhase] = useState("waiting");
+  const [patternScore, setPatternScore] = useState(0);
 
   const [wordInput, setWordInput] = useState("");
   const [words, setWords] = useState([]);
@@ -22,9 +23,7 @@ function App() {
   const inputRef = useRef(null);
   const [feedback, setFeedback] = useState("");
 
-  useEffect(() => {
-    initializeGame();
-  }, []);
+  
 
   useEffect(() => {
     if (gamePhase === "enterWords" && timer > 0) {
@@ -87,6 +86,8 @@ function App() {
     }, 800);
   };
 
+  React.useImperativeHandle(ref, () => ({ start: initializeGame }));
+
   const initializeGame = () => {
     const newLetters = getRandomLetters();
     const newPattern = getRandomPattern(newLetters);
@@ -109,6 +110,7 @@ function App() {
     setRevealed(newRevealed);
     setSelectedTiles(newSelected);
     if (newSelected.length === 5) {
+      setPatternScore(50);
       setGamePhase("enterWords");
       setTimer(30);
     }
@@ -195,7 +197,7 @@ function App() {
             Submit
           </button>
           {feedback && <p style={{ marginTop: "0.5rem", fontWeight: "bold" }}>{feedback}</p>}
-          <p style={{ fontWeight: "bold", marginTop: "1rem" }}>{`Total Score: ${words.reduce((sum, w) => sum + (w.valid ? w.score : 0), 0)}`}</p><ul style={{ marginTop: "1rem" }}>
+          <p style={{ fontWeight: "bold", marginTop: "1rem" }}>{`Total Score: ${patternScore + words.reduce((sum, w) => sum + (w.valid ? w.score : 0), 0)}`}</p><ul style={{ marginTop: "1rem" }}>
             {words.map((w, i) => (
               <li key={i}>
                 {w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}
@@ -211,7 +213,8 @@ function App() {
 
 import ReactDOM from "react-dom";
 
-export default function AppWrapper() {
+const App = React.forwardRef((props, ref) => {
+  const appRef = React.useRef();
   const [showInstructions, setShowInstructions] = React.useState(true);
 
   return (
@@ -235,12 +238,7 @@ export default function AppWrapper() {
             fontFamily: "sans-serif"
           }}>
             <h2 style={{ color: "#786daa" }}>How to Play</h2>
-            <p style={{ fontSize: "0.9rem", marginBottom: "1rem" }}>
-              You'll see a flashing pattern of 5 tiles.<br/>
-              Repeat the pattern by clicking the same tiles.<br/>
-              Then form as many real words as you can using the letters from those tiles.<br/>
-              Longer words = more points!
-            </p>
+            <p style={{ fontSize: "0.9rem", marginBottom: "1rem" }}>Watch the pattern of 5 flashing tiles.<br/><br/>Repeat it by clicking the tiles in order.<br/><br/>Use the letters from the pattern to make real words.<br/><br/>Only valid, correctly spelled words count — no repeats or banned words!<br/><br/>Ready?</p>
             <button
               onClick={() => setShowInstructions(false)}
               style={{
@@ -257,7 +255,7 @@ export default function AppWrapper() {
           </div>
         </div>
       )}
-      <App />
+      <App onGameStart={() => appRef.current?.start()} ref={appRef} />
     </>
   );
 }
