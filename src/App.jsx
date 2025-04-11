@@ -199,7 +199,37 @@ function App({ gameStarted }) {
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
       <h1 style={{ color: "#786daa" }}>Fresh <span style={{ color: "#84dade" }}>Focus</span></h1>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem", marginBottom: "1rem" }}>
+    <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
+  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
+    {letters.map((letter, idx) => {
+      const isRevealed = revealed[idx];
+      const isFlashing = flashingTile === idx;
+      const backgroundColor = isFlashing ? "#fff" : isRevealed ? "#ddd" : "#786daa";
+      const color = isRevealed || isFlashing ? "#000" : "#fff";
+      return (
+        <div
+          key={idx}
+          onClick={() => handleTileClick(idx)}
+          style={{
+            backgroundColor,
+            color,
+            width: 60,
+            height: 60,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: 20,
+            borderRadius: 8,
+            cursor: "pointer"
+          }}
+        >
+          {isRevealed || isFlashing ? letter : ""}
+        </div>
+      );
+    })}
+  </div>
+</
+
         {letters.map((letter, idx) => {
           const isRevealed = revealed[idx];
           const isFlashing = flashingTile === idx;
