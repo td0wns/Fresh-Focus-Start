@@ -229,13 +229,38 @@ function App({ gameStarted }) {
           <button onClick={handleWordSubmit} style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
             Submit
           </button>
+          
           {feedback && <p style={{ marginTop: "0.5rem", fontWeight: "bold" }}>{feedback}</p>}
           <div style={{ marginTop: "1rem", fontSize: "1rem", fontWeight: "bold" }}>
-            {words.length > 0 && (() => { const w = words[words.length - 1]; return (
+            {words.length > 0 ? (() => { const w = words[words.length - 1]; return (
+              <div>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>
+            )})() : null}
+          </div>
+
+          <details style={{ marginTop: "2rem", fontSize: "0.9rem" }}>
+            <summary style={{ cursor: "pointer", fontWeight: "bold" }}>Game Summary + New Game</summary>
+            <div style={{ marginTop: "0.5rem", backgroundColor: "#f5f5f5", padding: "1rem", borderRadius: "8px" }}>
+              <p><strong>Pattern Score:</strong> {patternScore}</p>
+              <p><strong>Word Score:</strong> {wordScore}</p>
+              <p><strong>Total Score:</strong> {patternScore + wordScore}</p>
+              <p><strong>Valid Words:</strong></p>
+              <ul style={{ paddingLeft: "1.2rem", textAlign: "left" }}>
+                {words.filter(w => w.valid).map((w, i) => (
+                  <li key={i}>{w.word} (+{w.score})</li>
+                ))}
+              </ul>
+              <button onClick={() => window.location.reload()} style={{ marginTop: "1rem", padding: "0.5rem 1rem", backgroundColor: "#786daa", color: "white", border: "none", borderRadius: "6px" }}>
+                New Game
+              </button>
+            </div>
+          </details>
+
+          <div style={{ marginTop: "1rem", fontSize: "1rem", fontWeight: "bold" }}>
+            {words.length > 0 ? (() => { const w = words[words.length - 1]; return (
               <li key={i}>
                 {w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}
               </li>
-            )} )()}
+            )})() : null}
           </div>
         </>
       )}
