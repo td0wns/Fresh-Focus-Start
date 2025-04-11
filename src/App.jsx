@@ -14,11 +14,12 @@ function App({ gameStarted }) {
   const [selectedTiles, setSelectedTiles] = useState([]);
   const [flashingTile, setFlashingTile] = useState(null);
   const [gamePhase, setGamePhase] = useState("waiting");
-  const [patternScore, setPatternScore] = useState(0);
 
   const [wordInput, setWordInput] = useState("");
   const [words, setWords] = useState([]);
   const [timer, setTimer] = useState(0);
+  const [patternScore, setPatternScore] = useState(0);
+  const [wordScore, setWordScore] = useState(0);
   const inputRef = useRef(null);
   const [feedback, setFeedback] = useState("");
 
@@ -100,6 +101,7 @@ function App({ gameStarted }) {
     setWordInput("");
     setFeedback("");
     setPatternScore(0);
+    setWordScore(0);
     setGamePhase("showPattern");
     startPatternAnimation(newPattern);
   };
@@ -109,23 +111,23 @@ function App({ gameStarted }) {
     const newRevealed = [...revealed];
     newRevealed[index] = true;
     const newSelected = [...selectedTiles, index];
-    setRevealed(newRevealed);
-    setSelectedTiles(newSelected);
-    
+
     let tileScore = 0;
     if (pattern.includes(index)) {
       tileScore += 10;
       const position = newSelected.length - 1;
       if (pattern[position] === index) {
-        tileScore += 10; // correct order bonus
+        tileScore += 10;
       }
     }
-    setPatternScore((prev) => prev + tileScore);
+
+    setRevealed(newRevealed);
+    setSelectedTiles(newSelected);
+    setPatternScore(prev => prev + tileScore);
 
     if (newSelected.length === 5) {
       setGamePhase("enterWords");
       setTimer(30);
-      setPatternScore(50);
     }
   };
 
@@ -145,41 +147,39 @@ function App({ gameStarted }) {
       return;
     }
 
-    const revealedLetters = selectedTiles.map(i => letters[i]);
-    if (!raw.split("").some(letter => revealedLetters.includes(letter))) {
+    const patternLetters = selectedTiles.filter(i => pattern.includes(i)).map(i => letters[i]);
+    const nonPatternLetters = selectedTiles.filter(i => !pattern.includes(i)).map(i => letters[i]);
+
+    const usedPattern = [...new Set(raw.split("").filter(l => patternLetters.includes(l)))];
+    const usedNonPattern = [...new Set(raw.split("").filter(l => nonPatternLetters.includes(l)))];
+
+    if (usedPattern.length === 0 && usedNonPattern.length === 0) {
       setFeedback("❌ Word doesn't use any revealed letters.");
       return;
     }
 
     const valid = await isWordValid(raw);
-
-    const patternLetters = selectedTiles.filter(i => pattern.includes(i)).map(i => letters[i]);
-    const nonPatternLetters = selectedTiles.filter(i => !pattern.includes(i)).map(i => letters[i]);
-
-    const usedPattern = [...new Set(word.split("").filter(l => patternLetters.includes(l)))];
-    const usedNonPattern = [...new Set(word.split("").filter(l => nonPatternLetters.includes(l)))];
-
-    let score = usedPattern.length * 10 + usedNonPattern.length * 5;
-    if (usedPattern.length === 5) {
-      score *= 2; // full pattern match bonus
-    }
-
     if (!valid) {
       setFeedback("❌ Not a real word.");
     } else {
-      setFeedback(`✅ "${raw}" accepted! +${raw.length * 5} points`);
+      setFeedback(`✅ "${raw}" accepted!`);
     }
 
-    setWords([...words, { word: raw, valid, score: valid ? raw.length * 5 : 0 }]);
+    let score = usedPattern.length * 10 + usedNonPattern.length * 5;
+    if (usedPattern.length === 5) {
+      score *= 2;
+    }
+
+    setWords(prev => [...prev, { word: raw, valid, score }]);
+    if (valid) {
+      setWordScore(prev => prev + score);
+    }
     setWordInput("");
   };
-
-  const totalScore = patternScore + words.reduce((sum, w) => sum + (w.valid ? w.score : 0), 0);
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
       <h1 style={{ color: "#786daa" }}>Fresh <span style={{ color: "#84dade" }}>Focus</span></h1>
-
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem", marginBottom: "1rem" }}>
         {letters.map((letter, idx) => {
           const isRevealed = revealed[idx];
@@ -212,7 +212,9 @@ function App({ gameStarted }) {
       {gamePhase === "enterWords" && (
         <>
           <p>⏱ Time Left: {timer}s</p>
-          <p style={{ fontWeight: "bold" }}>Total Score: {totalScore}</p>
+          <p style={{ fontWeight: "bold" }}>
+            Pattern Score: {patternScore} | Word Score: {wordScore} | Total: {patternScore + wordScore}
+          </p>
           <input
             ref={inputRef}
             value={wordInput}
@@ -226,7 +228,9 @@ function App({ gameStarted }) {
           {feedback && <p style={{ marginTop: "0.5rem", fontWeight: "bold" }}>{feedback}</p>}
           <ul style={{ marginTop: "1rem" }}>
             {words.map((w, i) => (
-              <li key={i}>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</li>
+              <li key={i}>
+                {w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}
+              </li>
             ))}
           </ul>
         </>
@@ -236,11 +240,11 @@ function App({ gameStarted }) {
 }
 
 export default function AppWrapper() {
-  const [showInstructions, setShowInstructions] = useState(true);
+  const [gameStarted, setGameStarted] = useState(false);
 
   return (
     <>
-      {showInstructions && (
+      {!gameStarted && (
         <div style={{
           position: "fixed",
           inset: 0,
@@ -267,7 +271,7 @@ export default function AppWrapper() {
               Ready?
             </p>
             <button
-              onClick={() => setShowInstructions(false)}
+              onClick={() => setGameStarted(true)}
               style={{
                 backgroundColor: "#84dade",
                 color: "white",
@@ -282,7 +286,7 @@ export default function AppWrapper() {
           </div>
         </div>
       )}
-      <App gameStarted={!showInstructions} />
+      <App gameStarted={gameStarted} />
     </>
   );
 }
