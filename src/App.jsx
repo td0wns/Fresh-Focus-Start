@@ -180,34 +180,34 @@ function App({ gameStarted }) {
 
  const handleGameEnd = async () => {
   const totalScore = patternScore + wordScore;
-  console.log("Saving score:", totalScore);
+  const currentMonth = new Date().toISOString().slice(0, 7); // "2025-04"
+  console.log("Saving score:", totalScore, "for month:", currentMonth);
 
-  // Insert the score and capture the response
+  // Insert score into Supabase
   const { data: insertData, error: insertError } = await supabase
     .from("scores")
-    .insert([{ score: totalScore }])
-    .select(); // this forces Supabase to return the inserted row
+    .insert([{ score: totalScore, month: currentMonth }])
+    .select();
 
   if (insertError) {
     console.error("❌ Insert error:", insertError.message);
   } else {
-    console.log("✅ Inserted score:", insertData);
+    console.log("✅ Score inserted:", insertData);
   }
 
-  // Fetch the top score
-  const { data: topData, error: fetchError } = await supabase
+  // Fetch top 5 scores for this month
+  const { data: topScoresData, error: fetchError } = await supabase
     .from("scores")
     .select("score")
+    .eq("month", currentMonth)
     .order("score", { ascending: false })
-    .limit(1);
+    .limit(5);
 
   if (fetchError) {
     console.error("❌ Fetch error:", fetchError.message);
   } else {
-    console.log("🎯 Top score fetched:", topData);
-    if (topData && topData.length > 0) {
-      setTopScore(topData[0].score);
-    }
+    console.log("🏆 Top 5 scores:", topScoresData);
+    setTopScore(topScoresData); // Store full top list, not just one score
   }
 };
 
