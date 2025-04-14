@@ -119,7 +119,7 @@ const [topScore, setTopScore] = useState([]); // now it's a list
     setFeedback("");
     setPatternScore(0);
     setWordScore(0);
-    setTopScore(null);
+setTopScore([]); // reset top scores as an empty array
     setGamePhase("showPattern");
     startPatternAnimation(newPattern);
   };
