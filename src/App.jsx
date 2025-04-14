@@ -178,30 +178,38 @@ function App({ gameStarted }) {
     setWordInput("");
   };
 
-  const handleGameEnd = async () => {
+ const handleGameEnd = async () => {
   const totalScore = patternScore + wordScore;
   console.log("Saving score:", totalScore);
 
-  const { error } = await supabase.from("scores").insert([{ score: totalScore }]);
-  if (error) {
-    console.error("❌ Supabase insert error:", error.message);
+  // Insert the score and capture the response
+  const { data: insertData, error: insertError } = await supabase
+    .from("scores")
+    .insert([{ score: totalScore }])
+    .select(); // this forces Supabase to return the inserted row
+
+  if (insertError) {
+    console.error("❌ Insert error:", insertError.message);
   } else {
-    console.log("✅ Score saved successfully!");
+    console.log("✅ Inserted score:", insertData);
   }
 
-  const { data, error: selectError } = await supabase
+  // Fetch the top score
+  const { data: topData, error: fetchError } = await supabase
     .from("scores")
     .select("score")
     .order("score", { ascending: false })
     .limit(1);
 
-  if (selectError) {
-    console.error("❌ Supabase fetch error:", selectError.message);
-  } else if (data && data.length > 0) {
-    setTopScore(data[0].score);
+  if (fetchError) {
+    console.error("❌ Fetch error:", fetchError.message);
+  } else {
+    console.log("🎯 Top score fetched:", topData);
+    if (topData && topData.length > 0) {
+      setTopScore(topData[0].score);
+    }
   }
 };
-
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
