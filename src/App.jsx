@@ -58,37 +58,66 @@ const [topScore, setTopScore] = useState([]); // now it's a list
     }
   }, [gamePhase, timer]);
 
-  const getRandomLetters = () => {
-    const result = [];
-    const weightedLetters = [];
-    for (let char of LETTERS) {
-      let weight = 1;
-      if (RARE_LETTERS.includes(char)) weight *= 0.5;
-      if (["V", "B", "Y", "G", "P"].includes(char)) weight *= 0.7;
-      weightedLetters.push(...Array(Math.floor(weight * 100)).fill(char));
-    }
-    const vowel = VOWELS[Math.floor(Math.random() * VOWELS.length)];
-    result.push(vowel);
-    while (result.length < TOTAL_TILES) {
-      const char = weightedLetters[Math.floor(Math.random() * weightedLetters.length)];
-      result.push(char);
-    }
-    return result.slice(0, TOTAL_TILES);
-  };
+ const getRandomLetters = () => {
+  const baseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const vowels = ["A", "E", "I", "O", "U"];
+  const rareLetters = ["Q", "X", "Z", "J", "K"];
+  const uncommonLetters = ["V", "B", "Y", "G", "P"];
 
-  const getRandomPattern = (letters) => {
-    const pattern = new Set();
-    const usedLetters = new Set();
-    while (pattern.size < 5) {
-      const index = Math.floor(Math.random() * TOTAL_TILES);
-      const letter = letters[index];
-      if (!usedLetters.has(letter)) {
-        pattern.add(index);
-        usedLetters.add(letter);
-      }
+  const result = Array(TOTAL_TILES).fill(null);
+
+  // Step 1: Place vowels randomly in the grid
+  const vowelPositions = [];
+  while (vowelPositions.length < vowels.length) {
+    const index = Math.floor(Math.random() * TOTAL_TILES);
+    if (!vowelPositions.includes(index)) {
+      vowelPositions.push(index);
     }
-    return Array.from(pattern);
-  };
+  }
+  vowelPositions.forEach((pos, i) => {
+    result[pos] = vowels[i];
+  });
+
+  // Step 2: Create weighted letter pool (excluding vowels)
+  const weightedPool = [];
+  for (let letter of baseLetters) {
+    if (vowels.includes(letter)) continue;
+    let weight = 1.0;
+    if (rareLetters.includes(letter)) weight *= 0.4;
+    else if (uncommonLetters.includes(letter)) weight *= 0.6;
+    const count = Math.floor(weight * 100);
+    weightedPool.push(...Array(count).fill(letter));
+  }
+
+  // Step 3: Fill remaining grid spots
+  for (let i = 0; i < TOTAL_TILES; i++) {
+    if (result[i] === null) {
+      const randomIndex = Math.floor(Math.random() * weightedPool.length);
+      result[i] = weightedPool[randomIndex];
+    }
+  }
+
+  return result;
+};
+
+ const getRandomPattern = (letters) => {
+  const pattern = new Set();
+  const vowelIndices = letters
+    .map((l, i) => (["A", "E", "I", "O", "U"].includes(l) ? i : null))
+    .filter((i) => i !== null);
+
+  // Step 1: Always include one vowel
+  const vowelIndex = vowelIndices[Math.floor(Math.random() * vowelIndices.length)];
+  pattern.add(vowelIndex);
+
+  // Step 2: Add random non-duplicate tiles to complete 5
+  while (pattern.size < 5) {
+    const index = Math.floor(Math.random() * TOTAL_TILES);
+    pattern.add(index);
+  }
+
+  return Array.from(pattern);
+};
 
   const startPatternAnimation = (patternArray) => {
     let index = 0;
