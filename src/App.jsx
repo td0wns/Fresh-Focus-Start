@@ -256,7 +256,17 @@ const [topScore, setTopScore] = useState([]); // now it's a list
               <li>Double points if your word uses all 5 pattern letters.</li>
             </ul>
             <p><strong>Your Score:</strong> {patternScore + wordScore}</p>
-            {topScore !== null && <p><strong>Top Score:</strong> {topScore}</p>}
+            {topScore.length > 0 && (
+  <>
+    <p><strong>Top 5 Scores This Month:</strong></p>
+    <ol style={{ textAlign: "left", paddingLeft: "1.5rem" }}>
+      {topScore.map((entry, i) => (
+        <li key={i}>Score: {entry.score}</li>
+      ))}
+    </ol>
+  </>
+)}
+
             <button onClick={() => window.location.reload()} style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem" }}>Start New Game</button>
           </div>
         </div>
