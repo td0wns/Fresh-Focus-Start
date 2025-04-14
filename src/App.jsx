@@ -237,8 +237,28 @@ setTopScore([]); // reset top scores as an empty array
         <>
           <p>⏱ Time Left: {timer}s</p>
           <p><strong>Pattern Score:</strong> {patternScore} | <strong>Word Score:</strong> {wordScore} | <strong>Total:</strong> {patternScore + wordScore}</p>
-          <input ref={inputRef} value={wordInput} onChange={(e) => setWordInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleWordSubmit()} placeholder="Enter a word" style={{ padding: "0.5rem", width: "200px" }} />
-          <button onClick={handleWordSubmit} style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>Submit</button>
+          <form
+  onSubmit={(e) => {
+    e.preventDefault();
+    handleWordSubmit();
+  }}
+  style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: "1rem" }}
+>
+  <input
+    ref={inputRef}
+    value={wordInput}
+    onChange={(e) => setWordInput(e.target.value)}
+    placeholder="Enter a word"
+    style={{
+      padding: "0.5rem",
+      width: "200px",
+      fontSize: "16px" // Prevent Safari zoom
+    }}
+  />
+  <button type="submit" style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
+    Submit
+  </button>
+</form>
           {feedback && <p style={{ fontWeight: "bold", marginTop: "0.5rem" }}>{feedback}</p>}
           <div style={{ marginTop: "1rem" }}>{words.map((w, i) => (<div key={i}>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>))}</div>
         </>
