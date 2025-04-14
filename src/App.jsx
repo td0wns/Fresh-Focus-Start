@@ -35,7 +35,7 @@ function App({ gameStarted }) {
   const [timer, setTimer] = useState(0);
   const [patternScore, setPatternScore] = useState(0);
   const [wordScore, setWordScore] = useState(0);
-  const [topScore, setTopScore] = useState(null);
+const [topScore, setTopScore] = useState([]); // now it's a list
   const inputRef = useRef(null);
   const [feedback, setFeedback] = useState("");
 
