@@ -232,7 +232,7 @@ setTopScore([]); // reset top scores as an empty array
           })}
         </div>
       </div>
-      <div style={{ marginTop: "1rem" }}>
+     <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
   <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
     {[0, 1, 2, 3, 4].map((i) => {
       const tileIndex = selectedTiles[i];
@@ -242,9 +242,9 @@ setTopScore([]); // reset top scores as an empty array
 
       const backgroundColor = isSelected
         ? isPattern
-          ? "#84dade" // pattern match
-          : "#ddd"     // non-pattern
-        : "#000";       // default (black)
+          ? "#84dade"
+          : "#ddd"
+        : "#000";
       const color = isSelected ? "#000" : "#fff";
 
       return (
@@ -268,7 +268,6 @@ setTopScore([]); // reset top scores as an empty array
     })}
   </div>
 </div>
-
 
       {gamePhase === "enterWords" && (
         <>
