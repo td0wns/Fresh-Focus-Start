@@ -100,24 +100,55 @@ const [topScore, setTopScore] = useState([]); // now it's a list
   return result;
 };
 
- const getRandomPattern = (letters) => {
+const getRandomPattern = (letters) => {
   const pattern = new Set();
+  const letterCounts = {}; // Tracks how many times each letter is used
+
+  const vowels = ["A", "E", "I", "O", "U"];
   const vowelIndices = letters
-    .map((l, i) => (["A", "E", "I", "O", "U"].includes(l) ? i : null))
+    .map((l, i) => (vowels.includes(l) ? i : null))
     .filter((i) => i !== null);
 
-  // Step 1: Always include one vowel
-  const vowelIndex = vowelIndices[Math.floor(Math.random() * vowelIndices.length)];
-  pattern.add(vowelIndex);
+  const nonVowelIndices = letters
+    .map((l, i) => (!vowels.includes(l) ? i : null))
+    .filter((i) => i !== null);
 
-  // Step 2: Add random non-duplicate tiles to complete 5
+  // Step 1: Always add one vowel
+  const firstVowel = vowelIndices[Math.floor(Math.random() * vowelIndices.length)];
+  const firstVowelLetter = letters[firstVowel];
+  pattern.add(firstVowel);
+  letterCounts[firstVowelLetter] = 1;
+
+  // Step 2: Optionally add a second vowel
+  const remainingVowels = vowelIndices.filter(i => i !== firstVowel);
+  if (remainingVowels.length > 0 && Math.random() < 0.5) {
+    const secondVowel = remainingVowels.find(i => {
+      const l = letters[i];
+      return (letterCounts[l] || 0) < 2;
+    });
+    if (secondVowel !== undefined) {
+      pattern.add(secondVowel);
+      const l = letters[secondVowel];
+      letterCounts[l] = (letterCounts[l] || 0) + 1;
+    }
+  }
+
+  // Step 3: Add more letters (avoiding triplicates)
   while (pattern.size < 5) {
-    const index = Math.floor(Math.random() * TOTAL_TILES);
+    const pool = [...nonVowelIndices, ...vowelIndices]; // Fallback to whole grid
+    const index = pool[Math.floor(Math.random() * pool.length)];
+    const letter = letters[index];
+
+    if (pattern.has(index)) continue;
+    if ((letterCounts[letter] || 0) >= 2) continue;
+
     pattern.add(index);
+    letterCounts[letter] = (letterCounts[letter] || 0) + 1;
   }
 
   return Array.from(pattern);
 };
+
 
   const startPatternAnimation = (patternArray) => {
     let index = 0;
