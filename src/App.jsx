@@ -232,6 +232,43 @@ setTopScore([]); // reset top scores as an empty array
           })}
         </div>
       </div>
+      <div style={{ marginTop: "1rem" }}>
+  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
+    {[0, 1, 2, 3, 4].map((i) => {
+      const tileIndex = selectedTiles[i];
+      const letter = tileIndex !== undefined ? letters[tileIndex] : "";
+      const isPattern = pattern.includes(tileIndex);
+      const isSelected = tileIndex !== undefined;
+
+      const backgroundColor = isSelected
+        ? isPattern
+          ? "#84dade" // pattern match
+          : "#ddd"     // non-pattern
+        : "#000";       // default (black)
+      const color = isSelected ? "#000" : "#fff";
+
+      return (
+        <div
+          key={i}
+          style={{
+            backgroundColor,
+            color,
+            width: 60,
+            height: 60,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: 20,
+            borderRadius: 8
+          }}
+        >
+          {letter}
+        </div>
+      );
+    })}
+  </div>
+</div>
+
 
       {gamePhase === "enterWords" && (
         <>
