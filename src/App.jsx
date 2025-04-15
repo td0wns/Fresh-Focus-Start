@@ -102,7 +102,7 @@ const [topScore, setTopScore] = useState([]); // now it's a list
 
 const getRandomPattern = (letters) => {
   const pattern = new Set();
-  const letterCounts = {}; // Track frequency of letters in the pattern
+  const letterCounts = {};
 
   const vowels = ["A", "E", "I", "O", "U"];
   const vowelIndices = letters
@@ -113,42 +113,22 @@ const getRandomPattern = (letters) => {
     .map((l, i) => (!vowels.includes(l) ? i : null))
     .filter((i) => i !== null);
 
-  // Step 1: Always add one vowel
-  const firstVowelIndex = vowelIndices[Math.floor(Math.random() * vowelIndices.length)];
-  const firstVowelLetter = letters[firstVowelIndex];
-  pattern.add(firstVowelIndex);
-  letterCounts[firstVowelLetter] = 1;
-  let vowelCount = 1;
+  // Step 1: Always include exactly one vowel
+  const vowelIndex = vowelIndices[Math.floor(Math.random() * vowelIndices.length)];
+  const vowelLetter = letters[vowelIndex];
+  pattern.add(vowelIndex);
+  letterCounts[vowelLetter] = 1;
 
-  // Step 2: 20% chance to add a second vowel
-  const remainingVowelIndices = vowelIndices.filter(i => i !== firstVowelIndex);
-  if (remainingVowelIndices.length > 0 && Math.random() < 0.2) {
-    for (let i = 0; i < remainingVowelIndices.length; i++) {
-      const index = remainingVowelIndices[i];
-      const l = letters[index];
-      if ((letterCounts[l] || 0) < 2) {
-        pattern.add(index);
-        letterCounts[l] = (letterCounts[l] || 0) + 1;
-        vowelCount++;
-        break;
-      }
-    }
-  }
-
-  // Step 3: Fill up to 5 pattern tiles with non-vowels (or unused vowels if < 2 already)
-  const allIndices = [...nonVowelIndices, ...remainingVowelIndices];
+  // Step 2: Fill remaining pattern tiles from non-vowels only
   while (pattern.size < 5) {
-    const index = allIndices[Math.floor(Math.random() * allIndices.length)];
+    const index = nonVowelIndices[Math.floor(Math.random() * nonVowelIndices.length)];
     const letter = letters[index];
 
-    const isVowel = vowels.includes(letter);
     if (pattern.has(index)) continue;
     if ((letterCounts[letter] || 0) >= 2) continue;
-    if (isVowel && vowelCount >= 2) continue;
 
     pattern.add(index);
     letterCounts[letter] = (letterCounts[letter] || 0) + 1;
-    if (isVowel) vowelCount++;
   }
 
   return Array.from(pattern);
