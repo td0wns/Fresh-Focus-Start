@@ -403,13 +403,21 @@ if (valid) {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
           <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "1rem", maxWidth: "500px", textAlign: "left" }}>
             <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>Well done!</h2>
-            <p><strong>Scoring system:</strong></p>
-            <ul style={{ paddingLeft: "1.2rem" }}>
-              <li>Each correct pattern tile: 10 pts + 10 bonus if in correct order.</li>
-              <li>Words: 10 pts for each pattern letter, 5 pts for other revealed letters.</li>
-              <li>Double points if your word uses all 5 pattern letters.</li>
-            </ul>
-            <p><strong>Your Score:</strong> {patternScore + wordScore}</p>
+<div style={{ marginBottom: "1rem" }}>
+  <p><strong>Score Breakdown:</strong></p>
+  <ul style={{ paddingLeft: "1.2rem" }}>
+    <li>🧠 Pattern Score: {patternScore} points</li>
+    <li>📝 Word Score: {wordScore} points</li>
+    <li>✨ Words that used all 5 selected letters: {
+      words.filter(w => {
+        const wordLetters = new Set(w.word.split(""));
+        return selectedTiles.every(i => wordLetters.has(letters[i]));
+      }).length
+    }</li>
+    <li><strong>Total:</strong> {patternScore + wordScore} points</li>
+  </ul>
+</div>
+
             {topScore.length > 0 && (
               <>
                 <p><strong>Top 5 Scores This Month:</strong></p>
