@@ -372,9 +372,11 @@ if (valid) {
           </form>
           {feedback && <p style={{ fontWeight: "bold", marginTop: "0.5rem" }}>{feedback}</p>}
           <div style={{ marginTop: "1rem" }}>
-            {words.map((w, i) => (
-              <div key={i}>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>
-            ))}
+          {words
+  .filter(w => w.valid) // ✅ Only show valid words
+  .map((w, i) => (
+    <div key={i}>{w.word} ✅ (+{w.score})</div>
+))}
           </div>
         </>
       )}
