@@ -178,40 +178,45 @@ setTopScore([]); // reset top scores as an empty array
     startPatternAnimation(newPattern);
   };
 
-  const handleTileClick = (index) => {
-    if (gamePhase !== "selectTiles" || revealed[index] || selectedTiles.length >= 5) return;
-    const newRevealed = [...revealed];
-    newRevealed[index] = true;
-    const newSelected = [...selectedTiles, index];
-    let tileScore = 0;
-   let tileScore = 0;
-const position = newSelected.length - 1;
+ const handleTileClick = (index) => {
+  if (gamePhase !== "selectTiles" || revealed[index] || selectedTiles.length >= 5) return;
 
-// 1. Base 10 points for any correct pattern tile
-if (pattern.includes(index)) {
-  tileScore += 10;
-}
+  const newRevealed = [...revealed];
+  newRevealed[index] = true;
+  const newSelected = [...selectedTiles, index];
+  const position = newSelected.length - 1;
 
-// 2. Extra 10 points if it's in the correct position in the sequence
-if (pattern[position] === index) {
-  tileScore += 10;
-}
+  let tileScore = 0;
 
-// 3. Store the pattern score
-setPatternScore((prev) => prev + tileScore);
-
-// 4. If 5 tiles selected, check for full pattern match
-if (newSelected.length === 5) {
-  const isPerfectMatch = newSelected.every((selectedIndex, idx) => pattern[idx] === selectedIndex);
-  if (isPerfectMatch) {
-    setPatternScore((prev) => prev + 50); // Bonus for perfect match
+  // 1. Base score: +10 if this tile is in the pattern (any order)
+  if (pattern.includes(index)) {
+    tileScore += 10;
   }
 
-  setTimeout(() => {
-    setGamePhase("enterWords");
-    setTimer(30);
-  }, 500);
-}
+  // 2. Sequence bonus: +10 if tile is at correct position
+  if (pattern[position] === index) {
+    tileScore += 10;
+  }
+
+  setRevealed(newRevealed);
+  setSelectedTiles(newSelected);
+  setPatternScore((prev) => prev + tileScore);
+
+  // 3. Perfect pattern match bonus
+  if (newSelected.length === 5) {
+    const isPerfectMatch = newSelected.every(
+      (selectedIndex, idx) => pattern[idx] === selectedIndex
+    );
+    if (isPerfectMatch) {
+      setPatternScore((prev) => prev + 50);
+    }
+
+    setTimeout(() => {
+      setGamePhase("enterWords");
+      setTimer(30);
+    }, 500);
+  }
+};
 
     setRevealed(newRevealed);
     setSelectedTiles(newSelected);
