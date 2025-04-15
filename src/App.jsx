@@ -184,11 +184,35 @@ setTopScore([]); // reset top scores as an empty array
     newRevealed[index] = true;
     const newSelected = [...selectedTiles, index];
     let tileScore = 0;
-    if (pattern.includes(index)) {
-      tileScore += 10;
-      const position = newSelected.length - 1;
-      if (pattern[position] === index) tileScore += 10;
-    }
+   let tileScore = 0;
+const position = newSelected.length - 1;
+
+// 1. Base 10 points for any correct pattern tile
+if (pattern.includes(index)) {
+  tileScore += 10;
+}
+
+// 2. Extra 10 points if it's in the correct position in the sequence
+if (pattern[position] === index) {
+  tileScore += 10;
+}
+
+// 3. Store the pattern score
+setPatternScore((prev) => prev + tileScore);
+
+// 4. If 5 tiles selected, check for full pattern match
+if (newSelected.length === 5) {
+  const isPerfectMatch = newSelected.every((selectedIndex, idx) => pattern[idx] === selectedIndex);
+  if (isPerfectMatch) {
+    setPatternScore((prev) => prev + 50); // Bonus for perfect match
+  }
+
+  setTimeout(() => {
+    setGamePhase("enterWords");
+    setTimer(30);
+  }, 500);
+}
+
     setRevealed(newRevealed);
     setSelectedTiles(newSelected);
     setPatternScore((prev) => prev + tileScore);
