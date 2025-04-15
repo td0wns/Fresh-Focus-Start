@@ -10,13 +10,31 @@ const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VOWELS = ["A", "E", "I", "O", "U"];
 const RARE_LETTERS = ["Q", "X", "Z", "J", "K"];
 const BANNED_WORDS = [
-  "ASS", "ARSE", "DAMN", "DICK", "FUCK", "SHIT", "PISS", "BITCH", "CUNT", "TWAT", "HELL",
-  "SEX", "SEXY", "HORNY", "PENIS", "VAGINA", "CLIT", "DILDO", "BJ", "BOOB", "BOOBS", "CUM",
-  "JIZZ", "RIMJOB", "HANDJOB", "BLOWJOB", "FELLATIO", "CUNNILINGUS", "GENITAL", "XXX", "ORGASM", "ANAL", "BDSM", "FAP", "NIPPLE",
-  "NIGGER", "NEGRO", "CHINK", "SPIC", "KIKE", "JUNGLEBUNNY", "TARBABY", "WETBACK", 
-  "FAGGOT", "FAG", "DYKE", "GOOK", "TRANNY", "HEEB", "GYPPY", "GYPO", "MUZZIE", "MUZZY", 
-  "ZIONIST", "ISLAMOPHOBE", "NAZI", "HONKEY", "BINT", "BOLLOCKS", "SLUT", 
-  "SKANK", "WHORE", "HO", "TRAMP", "HAG",
+  // Explicit vulgarities
+  "ASS", "ASSES", "ARSE", "DAMN", "DICK", "DICKS", "DICKHEAD",
+  "FUCK", "FUCKS", "FUCKED", "FUCKER", "FUCKERS", "FUCKING",
+  "SHIT", "SHITS", "SHITTING", "SHITTED",
+  "PISS", "PISSED", "PISSING",
+  "BITCH", "BITCHES", "BITCHY",
+  "CUNT", "CUNTS",
+  "TWAT", "TWATS",
+  "HELL",
+
+  // Sexual references
+  "SEX", "SEXY", "HORNY", "PENIS", "PENISES", "VAGINA", "VAGINAS",
+  "CLIT", "CLITS", "DILDO", "DILDOS", "BJ", "BJS", "BOOB", "BOOBS",
+  "CUM", "CUMS", "CUMMING", "CUMMED",
+  "JIZZ", "RIMJOB", "HANDJOB", "BLOWJOB", "FELLATIO", "CUNNILINGUS",
+  "GENITAL", "GENITALS", "ORGASM", "ORGASMS", "XXX", "ANAL", "BDSM", "FAP", "NIPPLE", "NIPPLES",
+
+  // Racial/ethnic/religious slurs
+  "NIGGER", "NEGRO", "CHINK", "SPIC", "KIKE", "JUNGLEBUNNY", "TARBABY", "WETBACK",
+  "FAGGOT", "FAGGOTS", "FAG", "FAGS", "DYKE", "DYKES", "GOOK", "TRANNY", "TRANNIES",
+  "HEEB", "GYPPY", "GYPO", "MUZZIE", "MUZZY", "ZIONIST", "ISLAMOPHOBE", "NAZI",
+
+  // Gendered slurs / other
+  "HONKEY", "BINT", "BOLLOCKS", "SLUT", "SLUTS", "SKANK", "SKANKS", "WHORE", "WHORES",
+  "HO", "HOS", "TRAMP", "TRAMPS", "HAG", "HAGS"
 ];
 
 const GRID_SIZE = 5;
