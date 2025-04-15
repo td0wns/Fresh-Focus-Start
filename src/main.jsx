@@ -53,15 +53,15 @@ function AppWrapper() {
 
             {showDetails && (
               <div style={{ marginTop: "1rem", fontSize: "0.85rem", lineHeight: "1.5" }}>
-                <strong>1. Pattern Score</strong><br />
-                + 10 points for each correct tile in the pattern (no matter the order)<br />
+                <strong>Pattern Score</strong><br />
+                +10 points for each correct tile in the pattern (no matter the order)<br />
                 +10 bonus for each tile placed in the exact correct position<br />
                 +50 bonus if you get all 5 tiles in the correct order<br />
                 <em>Maximum pattern score: 5 tiles × (10 + 10) + 50 = 150 points</em><br /><br />
                 
-                <strong>2. Word Score</strong><br />
-                10 points for each pattern tile letter used in your word<br />
-                5 points for each non-pattern tile letter used<br />
+                <strong>Word Score</strong><br />
+                +10 points for each pattern tile letter used in your word<br />
+                +5 points for each non-pattern tile letter used<br />
                 +5 extra for each time you use letters like <strong>P, G, Y, B, V</strong><br />
                 +10 extra for letters like <strong>Z, Q, X, J, K</strong><br />
                 Using the same bonus letter multiple times? You get the bonus each time it appears!<br /><br />
