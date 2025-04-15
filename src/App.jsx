@@ -257,7 +257,9 @@ function App({ gameStarted }) {
   }
 
   const valid = await isWordValid(raw);
+if (valid) {
   setWords(prev => [...prev, { word: raw, valid, score }]);
+}
   if (valid) setWordScore(prev => prev + score);
 
   setFeedback(valid ? `✅ "${raw}" accepted!` : "❌ Not a real word.");
