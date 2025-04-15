@@ -245,7 +245,8 @@ function App({ gameStarted }) {
   const patternLetters = pattern.map(i => letters[i]);
   const wordLetters = raw.split("");
 
-  let score = 0;
+  let baseScore = 0;
+  let patternUsedCount = 0;
 
   for (let l of wordLetters) {
     const isPattern = patternLetters.includes(l);
@@ -253,32 +254,34 @@ function App({ gameStarted }) {
 
     // Base scoring
     if (isPattern) {
-      score += 10;
+      baseScore += 10;
+      patternUsedCount++;
     } else if (isSelected) {
-      score += 5;
+      baseScore += 5;
     }
 
     // Bonus scoring
     if (["P", "G", "Y", "B", "V"].includes(l) && isSelected) {
-      score += 5;
+      baseScore += 5;
     }
     if (["Z", "Q", "X", "J", "K"].includes(l) && isSelected) {
-      score += 10;
+      baseScore += 10;
     }
   }
 
-  // Check if all 5 selected letters are used
-  const usedLetters = new Set(wordLetters);
-  const allUsed = selectedLetters.every(l => usedLetters.has(l));
-  if (allUsed) {
-    score *= 2;
+  // Apply multiplier based on number of pattern letters used
+  let multiplier = 1;
+  if (patternUsedCount >= 2) {
+    multiplier = patternUsedCount; // x2 for 2, x3 for 3, etc.
   }
 
+  const totalScore = baseScore * multiplier;
+
   const valid = await isWordValid(raw);
-if (valid) {
-  setWords(prev => [...prev, { word: raw, valid, score }]);
-}
-  if (valid) setWordScore(prev => prev + score);
+  if (valid) {
+    setWords(prev => [...prev, { word: raw, valid, score: totalScore }]);
+    setWordScore(prev => prev + totalScore);
+  }
 
   setFeedback(valid ? `✅ "${raw}" accepted!` : "❌ Not a real word.");
   setWordInput("");
