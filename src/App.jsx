@@ -379,13 +379,14 @@ function App({ gameStarted }) {
             }}
             style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: "1rem" }}
           >
-            <input
-              ref={inputRef}
-              value={wordInput}
-              onChange={(e) => setWordInput(e.target.value)}
-              placeholder="Enter a word"
-              style={{ padding: "0.5rem", width: "200px", fontSize: "16px" }}
-            />
+           <input
+  ref={inputRef}
+  value={wordInput}
+  onChange={(e) => setWordInput(e.target.value)}
+  onPaste={(e) => e.preventDefault()} // 🚫 Disables pasting
+  placeholder="Enter a word"
+  style={{ padding: "0.5rem", width: "200px", fontSize: "16px" }}
+/>
             <button type="submit" style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
               Submit
             </button>
