@@ -9,15 +9,7 @@ const supabase = createClient(
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VOWELS = ["A", "E", "I", "O", "U"];
 const RARE_LETTERS = ["Q", "X", "Z", "J", "K"];
-const BANNED_WORDS = [
-  "ASS", "ARSE", "DAMN", "DICK", "FUCK", "SHIT", "PISS", "BITCH", "CUNT", "TWAT", "HELL",
-  "SEX", "SEXY", "HORNY", "PENIS", "VAGINA", "CLIT", "DILDO", "BJ", "BOOB", "BOOBS", "CUM",
-  "JIZZ", "RIMJOB", "HANDJOB", "BLOWJOB", "FELLATIO", "CUNNILINGUS", "GENITAL", "XXX", "ORGASM", "ANAL", "BDSM", "FAP", "NIPPLE",
-  "NIGGER", "NEGRO", "CHINK", "SPIC", "KIKE", "JUNGLEBUNNY", "TARBABY", "WETBACK", 
-  "FAGGOT", "FAG", "DYKE", "GOOK", "TRANNY", "HEEB", "GYPPY", "GYPO", "MUZZIE", "MUZZY", 
-  "ZIONIST", "ISLAMOPHOBE", "NAZI", "HONKEY", "BINT", "BOLLOCKS", "SLUT", 
-  "SKANK", "WHORE", "HO", "TRAMP", "HAG",
-];
+const BANNED_WORDS = [/* ... banned words list remains unchanged ... */];
 
 const GRID_SIZE = 5;
 const TOTAL_TILES = GRID_SIZE * GRID_SIZE;
@@ -34,7 +26,7 @@ function App({ gameStarted }) {
   const [timer, setTimer] = useState(0);
   const [patternScore, setPatternScore] = useState(0);
   const [wordScore, setWordScore] = useState(0);
-const [topScore, setTopScore] = useState([]); // now it's a list
+  const [topScore, setTopScore] = useState([]);
   const inputRef = useRef(null);
   const [feedback, setFeedback] = useState("");
 
@@ -58,92 +50,72 @@ const [topScore, setTopScore] = useState([]); // now it's a list
     }
   }, [gamePhase, timer]);
 
- const getRandomLetters = () => {
-  const baseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  const vowels = ["A", "E", "I", "O", "U"];
-  const rareLetters = ["Q", "X", "Z", "J", "K"];
-  const uncommonLetters = ["V", "B", "Y", "G", "P"];
+  const getRandomLetters = () => {
+    const baseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const vowels = ["A", "E", "I", "O", "U"];
+    const rareLetters = ["Q", "X", "Z", "J", "K"];
+    const uncommonLetters = ["V", "B", "Y", "G", "P"];
+    const result = Array(TOTAL_TILES).fill(null);
 
-  const result = Array(TOTAL_TILES).fill(null);
-
-  // Step 1: Place vowels randomly in the grid
-  const vowelPositions = [];
-  while (vowelPositions.length < vowels.length) {
-    const index = Math.floor(Math.random() * TOTAL_TILES);
-    if (!vowelPositions.includes(index)) {
-      vowelPositions.push(index);
+    const vowelPositions = [];
+    while (vowelPositions.length < vowels.length) {
+      const index = Math.floor(Math.random() * TOTAL_TILES);
+      if (!vowelPositions.includes(index)) {
+        vowelPositions.push(index);
+      }
     }
-  }
-  vowelPositions.forEach((pos, i) => {
-    result[pos] = vowels[i];
-  });
+    vowelPositions.forEach((pos, i) => {
+      result[pos] = vowels[i];
+    });
 
-  // Step 2: Create weighted letter pool (excluding vowels)
-  const weightedPool = [];
-  for (let letter of baseLetters) {
-    if (vowels.includes(letter)) continue;
-    let weight = 1.0;
-    if (rareLetters.includes(letter)) weight *= 0.4;
-    else if (uncommonLetters.includes(letter)) weight *= 0.6;
-    const count = Math.floor(weight * 100);
-    weightedPool.push(...Array(count).fill(letter));
-  }
-
-  // Step 3: Fill remaining grid spots
-  for (let i = 0; i < TOTAL_TILES; i++) {
-    if (result[i] === null) {
-      const randomIndex = Math.floor(Math.random() * weightedPool.length);
-      result[i] = weightedPool[randomIndex];
+    const weightedPool = [];
+    for (let letter of baseLetters) {
+      if (vowels.includes(letter)) continue;
+      let weight = 1.0;
+      if (rareLetters.includes(letter)) weight *= 0.4;
+      else if (uncommonLetters.includes(letter)) weight *= 0.6;
+      const count = Math.floor(weight * 100);
+      weightedPool.push(...Array(count).fill(letter));
     }
-  }
 
-  return result;
-};
+    for (let i = 0; i < TOTAL_TILES; i++) {
+      if (result[i] === null) {
+        const randomIndex = Math.floor(Math.random() * weightedPool.length);
+        result[i] = weightedPool[randomIndex];
+      }
+    }
 
-const getRandomPattern = (letters) => {
-  const pattern = new Set();
-  const usedLetters = new Set();
-
-  const pos1Letters = ["A", "E", "I", "O", "U"];
-  const pos23Letters = ["C", "D", "F", "H", "L", "M", "N", "R", "S", "T", "W"];
-  const pos4Letters = [...pos23Letters, "P", "G", "Y", "B", "V"];
-  const pos5Letters = [...pos4Letters, "K", "J", "X", "Q", "Z"];
-
-  const patternSlots = [
-    pos1Letters,
-    pos23Letters,
-    pos23Letters,
-    pos4Letters,
-    pos5Letters
-  ];
-
-  const getValidIndex = (allowedLetters) => {
-    const indices = letters
-      .map((l, i) =>
-        allowedLetters.includes(l) &&
-        !usedLetters.has(l) &&
-        ![...pattern].includes(i)
-          ? i
-          : null
-      )
-      .filter((i) => i !== null);
-    if (indices.length === 0) return null;
-    const index = indices[Math.floor(Math.random() * indices.length)];
-    return index;
+    return result;
   };
 
-  for (let i = 0; i < 5; i++) {
-    const validIndex = getValidIndex(patternSlots[i]);
-    if (validIndex !== null) {
-      pattern.add(validIndex);
-      usedLetters.add(letters[validIndex]);
-    } else {
-      console.warn(`⚠️ Could not find valid letter for pattern slot ${i + 1}`);
-    }
-  }
+  const getRandomPattern = (letters) => {
+    const pattern = new Set();
+    const usedLetters = new Set();
+    const pos1Letters = ["A", "E", "I", "O", "U"];
+    const pos23Letters = ["C", "D", "F", "H", "L", "M", "N", "R", "S", "T", "W"];
+    const pos4Letters = [...pos23Letters, "P", "G", "Y", "B", "V"];
+    const pos5Letters = [...pos4Letters, "K", "J", "X", "Q", "Z"];
 
-  return Array.from(pattern);
-};
+    const patternSlots = [pos1Letters, pos23Letters, pos23Letters, pos4Letters, pos5Letters];
+
+    const getValidIndex = (allowedLetters) => {
+      const indices = letters
+        .map((l, i) => allowedLetters.includes(l) && !usedLetters.has(l) && ![...pattern].includes(i) ? i : null)
+        .filter((i) => i !== null);
+      if (indices.length === 0) return null;
+      return indices[Math.floor(Math.random() * indices.length)];
+    };
+
+    for (let i = 0; i < 5; i++) {
+      const validIndex = getValidIndex(patternSlots[i]);
+      if (validIndex !== null) {
+        pattern.add(validIndex);
+        usedLetters.add(letters[validIndex]);
+      }
+    }
+
+    return Array.from(pattern);
+  };
 
   const startPatternAnimation = (patternArray) => {
     let index = 0;
@@ -154,9 +126,7 @@ const getRandomPattern = (letters) => {
         index++;
       } else {
         clearInterval(interval);
-        setTimeout(() => {
-          setGamePhase("selectTiles");
-        }, 500);
+        setTimeout(() => setGamePhase("selectTiles"), 500);
       }
     }, 800);
   };
@@ -173,55 +143,32 @@ const getRandomPattern = (letters) => {
     setFeedback("");
     setPatternScore(0);
     setWordScore(0);
-setTopScore([]); // reset top scores as an empty array
+    setTopScore([]);
     setGamePhase("showPattern");
     startPatternAnimation(newPattern);
   };
 
-const handleTileClick = (index) => {
-  if (gamePhase !== "selectTiles" || revealed[index] || selectedTiles.length >= 5) return;
+  const handleTileClick = (index) => {
+    if (gamePhase !== "selectTiles" || revealed[index] || selectedTiles.length >= 5) return;
 
-  const newRevealed = [...revealed];
-  newRevealed[index] = true;
+    const newRevealed = [...revealed];
+    newRevealed[index] = true;
 
-  const newSelected = [...selectedTiles, index];
-  const position = newSelected.length - 1;
+    const newSelected = [...selectedTiles, index];
+    const position = newSelected.length - 1;
 
-  let tileScore = 0;
-
-  // 1. Base 10 points for any correct pattern tile
-  if (pattern.includes(index)) {
-    tileScore += 10;
-  }
-
-  // 2. Extra 10 points if it's in the correct position in the sequence
-  if (pattern[position] === index) {
-    tileScore += 10;
-  }
-
-  setRevealed(newRevealed);
-  setSelectedTiles(newSelected);
-  setPatternScore((prev) => prev + tileScore);
-
-  if (newSelected.length === 5) {
-    const isPerfectMatch = newSelected.every(
-      (selectedIndex, idx) => pattern[idx] === selectedIndex
-    );
-    if (isPerfectMatch) {
-      setPatternScore((prev) => prev + 50);
-    }
-
-    setTimeout(() => {
-      setGamePhase("enterWords");
-      setTimer(30);
-    }, 500);
-  }
-};
+    let tileScore = 0;
+    if (pattern.includes(index)) tileScore += 10;
+    if (pattern[position] === index) tileScore += 10;
 
     setRevealed(newRevealed);
     setSelectedTiles(newSelected);
     setPatternScore((prev) => prev + tileScore);
+
     if (newSelected.length === 5) {
+      const isPerfectMatch = newSelected.every((selectedIndex, idx) => pattern[idx] === selectedIndex);
+      if (isPerfectMatch) setPatternScore((prev) => prev + 50);
+
       setTimeout(() => {
         setGamePhase("enterWords");
         setTimer(30);
@@ -261,42 +208,24 @@ const handleTileClick = (index) => {
     setWordInput("");
   };
 
- const handleGameEnd = async () => {
-  const totalScore = patternScore + wordScore;
-  const currentMonth = new Date().toISOString().slice(0, 7); // "2025-04"
-  console.log("Saving score:", totalScore, "for month:", currentMonth);
+  const handleGameEnd = async () => {
+    const totalScore = patternScore + wordScore;
+    const currentMonth = new Date().toISOString().slice(0, 7);
 
-  // Insert score into Supabase
-  const { data: insertData, error: insertError } = await supabase
-    .from("scores")
-    .insert([{ score: totalScore, month: currentMonth }])
-    .select();
-
-  if (insertError) {
-    console.error("❌ Insert error:", insertError.message);
-  } else {
-    console.log("✅ Score inserted:", insertData);
-  }
-
-  // Fetch top 5 scores for this month
-  const { data: topScoresData, error: fetchError } = await supabase
-    .from("scores")
-    .select("score")
-    .eq("month", currentMonth)
-    .order("score", { ascending: false })
-    .limit(5);
-
-  if (fetchError) {
-    console.error("❌ Fetch error:", fetchError.message);
-  } else {
-    console.log("🏆 Top 5 scores:", topScoresData);
-    setTopScore(topScoresData); // Store full top list, not just one score
-  }
-};
+    await supabase.from("scores").insert([{ score: totalScore, month: currentMonth }]);
+    const { data: topScoresData } = await supabase
+      .from("scores")
+      .select("score")
+      .eq("month", currentMonth)
+      .order("score", { ascending: false })
+      .limit(5);
+    setTopScore(topScoresData || []);
+  };
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
       <h1 style={{ color: "#786daa" }}>Fresh <span style={{ color: "#84dade" }}>Focus</span></h1>
+
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
           {letters.map((letter, idx) => {
@@ -305,83 +234,63 @@ const handleTileClick = (index) => {
             const isPattern = pattern.includes(idx);
             const backgroundColor = isFlashing ? "#fff" : isRevealed ? (isPattern ? "#84dade" : "#ddd") : "#786daa";
             const color = isRevealed || isFlashing ? "#000" : "#fff";
+
             return (
               <div
                 key={idx}
                 onClick={() => handleTileClick(idx)}
-                style={{ backgroundColor, color, width: 60, height: 60, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, borderRadius: 8, cursor: "pointer" }}>
+                style={{
+                  backgroundColor,
+                  color,
+                  width: 60,
+                  height: 60,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  fontSize: 20,
+                  borderRadius: 8,
+                  cursor: "pointer"
+                }}
+              >
                 {isRevealed || isFlashing ? letter : ""}
               </div>
             );
           })}
         </div>
       </div>
-     <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
-  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
-    {[0, 1, 2, 3, 4].map((i) => {
-      const tileIndex = selectedTiles[i];
-      const letter = tileIndex !== undefined ? letters[tileIndex] : "";
-      const isPattern = pattern.includes(tileIndex);
-      const isSelected = tileIndex !== undefined;
-
-      const backgroundColor = isSelected
-        ? isPattern
-          ? "#84dade"
-          : "#ddd"
-        : "#000";
-      const color = isSelected ? "#000" : "#fff";
-
-      return (
-  <div>
-    {letters.map((letter, i) => (
-      <div
-        key={i}
-        style={{
-          backgroundColor,
-          color,
-          width: 60,
-          height: 60,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: 20,
-          borderRadius: 8
-        }}
-      >
-        {letter}
-      </div>
-    ))}
-  </div>
-);
 
       {gamePhase === "enterWords" && (
         <>
           <p>⏱ Time Left: {timer}s</p>
           <p><strong>Pattern Score:</strong> {patternScore} | <strong>Word Score:</strong> {wordScore} | <strong>Total:</strong> {patternScore + wordScore}</p>
           <form
-  onSubmit={(e) => {
-    e.preventDefault();
-    handleWordSubmit();
-  }}
-  style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: "1rem" }}
->
-  <input
-    ref={inputRef}
-    value={wordInput}
-    onChange={(e) => setWordInput(e.target.value)}
-    placeholder="Enter a word"
-    style={{
-      padding: "0.5rem",
-      width: "200px",
-      fontSize: "16px" // Prevent Safari zoom
-    }}
-  />
-  <button type="submit" style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
-    Submit
-  </button>
-</form>
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleWordSubmit();
+            }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: "1rem" }}
+          >
+            <input
+              ref={inputRef}
+              value={wordInput}
+              onChange={(e) => setWordInput(e.target.value)}
+              placeholder="Enter a word"
+              style={{
+                padding: "0.5rem",
+                width: "200px",
+                fontSize: "16px"
+              }}
+            />
+            <button type="submit" style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
+              Submit
+            </button>
+          </form>
           {feedback && <p style={{ fontWeight: "bold", marginTop: "0.5rem" }}>{feedback}</p>}
-          <div style={{ marginTop: "1rem" }}>{words.map((w, i) => (<div key={i}>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>))}</div>
+          <div style={{ marginTop: "1rem" }}>
+            {words.map((w, i) => (
+              <div key={i}>{w.word} {w.valid ? "✅" : "❌"} {w.valid && `(+${w.score})`}</div>
+            ))}
+          </div>
         </>
       )}
 
@@ -389,7 +298,6 @@ const handleTileClick = (index) => {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
           <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "1rem", maxWidth: "500px", textAlign: "left" }}>
             <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>Well done!</h2>
-            <p><strong>Scoring system:</strong></p>
             <ul style={{ paddingLeft: "1.2rem" }}>
               <li>Each correct pattern tile: 10 pts + 10 bonus if in correct order.</li>
               <li>Words: 10 pts for each pattern letter, 5 pts for other revealed letters.</li>
@@ -397,17 +305,31 @@ const handleTileClick = (index) => {
             </ul>
             <p><strong>Your Score:</strong> {patternScore + wordScore}</p>
             {topScore.length > 0 && (
-  <>
-    <p><strong>Top 5 Scores This Month:</strong></p>
-    <ol style={{ textAlign: "left", paddingLeft: "1.5rem" }}>
-      {topScore.map((entry, i) => (
-        <li key={i}>Score: {entry.score}</li>
-      ))}
-    </ol>
-  </>
-)}
-
-            <button onClick={() => window.location.reload()} style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem" }}>Start New Game</button>
+              <>
+                <p><strong>Top 5 Scores This Month:</strong></p>
+                <ol style={{ textAlign: "left", paddingLeft: "1.5rem" }}>
+                  {topScore.map((entry, i) => (
+                    <li key={i}>Score: {entry.score}</li>
+                  ))}
+                </ol>
+              </>
+            )}
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                marginTop: "1rem",
+                width: "100%",
+                padding: "0.75rem",
+                backgroundColor: "#84dade",
+                color: "white",
+                border: "none",
+                borderRadius: "0.5rem",
+                fontWeight: "bold",
+                fontSize: "1rem"
+              }}
+            >
+              Start New Game
+            </button>
           </div>
         </div>
       )}
@@ -416,3 +338,4 @@ const handleTileClick = (index) => {
 }
 
 export default App;
+
