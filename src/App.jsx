@@ -217,31 +217,52 @@ function App({ gameStarted }) {
   };
 
   const handleWordSubmit = async () => {
-    const raw = wordInput.trim().toUpperCase();
-    if (!raw || BANNED_WORDS.includes(raw) || words.some(w => w.word === raw)) {
-      setFeedback("❌ Invalid or duplicate word.");
-      return;
+  const raw = wordInput.trim().toUpperCase();
+  if (!raw || BANNED_WORDS.includes(raw) || words.some(w => w.word === raw)) {
+    setFeedback("❌ Invalid or duplicate word.");
+    return;
+  }
+
+  const selectedLetters = selectedTiles.map(i => letters[i]);
+  const patternLetters = pattern.map(i => letters[i]);
+  const wordLetters = raw.split("");
+
+  let score = 0;
+
+  for (let l of wordLetters) {
+    const isPattern = patternLetters.includes(l);
+    const isSelected = selectedLetters.includes(l);
+
+    // Base scoring
+    if (isPattern) {
+      score += 10;
+    } else if (isSelected) {
+      score += 5;
     }
 
-    const patternLetters = selectedTiles.filter(i => pattern.includes(i)).map(i => letters[i]);
-    const nonPatternLetters = selectedTiles.filter(i => !pattern.includes(i)).map(i => letters[i]);
-    const usedPattern = [...new Set(raw.split("").filter(l => patternLetters.includes(l)))];
-    const usedNonPattern = [...new Set(raw.split("").filter(l => nonPatternLetters.includes(l)))];
-
-    if (usedPattern.length === 0 && usedNonPattern.length === 0) {
-      setFeedback("❌ Word doesn't use any revealed letters.");
-      return;
+    // Bonus scoring
+    if (["P", "G", "Y", "B", "V"].includes(l) && isSelected) {
+      score += 5;
     }
+    if (["Z", "Q", "X", "J", "K"].includes(l) && isSelected) {
+      score += 10;
+    }
+  }
 
-    const valid = await isWordValid(raw);
-    let score = usedPattern.length * 10 + usedNonPattern.length * 5;
-    if (usedPattern.length === 5) score *= 2;
+  // Check if all 5 selected letters are used
+  const usedLetters = new Set(wordLetters);
+  const allUsed = selectedLetters.every(l => usedLetters.has(l));
+  if (allUsed) {
+    score *= 2;
+  }
 
-    setWords(prev => [...prev, { word: raw, valid, score }]);
-    if (valid) setWordScore(prev => prev + score);
-    setFeedback(valid ? `✅ "${raw}" accepted!` : "❌ Not a real word.");
-    setWordInput("");
-  };
+  const valid = await isWordValid(raw);
+  setWords(prev => [...prev, { word: raw, valid, score }]);
+  if (valid) setWordScore(prev => prev + score);
+
+  setFeedback(valid ? `✅ "${raw}" accepted!` : "❌ Not a real word.");
+  setWordInput("");
+};
 
   const handleGameEnd = async () => {
     const totalScore = patternScore + wordScore;
