@@ -178,7 +178,7 @@ setTopScore([]); // reset top scores as an empty array
     startPatternAnimation(newPattern);
   };
 
- const handleTileClick = (index) => {
+const handleTileClick = (index) => {
   if (gamePhase !== "selectTiles" || revealed[index] || selectedTiles.length >= 5) return;
 
   const newRevealed = [...revealed];
@@ -187,37 +187,36 @@ setTopScore([]); // reset top scores as an empty array
   const newSelected = [...selectedTiles, index];
   const position = newSelected.length - 1;
 
-  const position = newSelected.length - 1;
+  let tileScore = 0;
 
-let tileScore = 0;
-
-// 1. Base 10 points for any correct pattern tile
-if (pattern.includes(index)) {
-  tileScore += 10;
-}
-
-// 2. Extra 10 points if it's in the correct position in the sequence
-if (pattern[position] === index) {
-  tileScore += 10;
-}
-
-setRevealed(newRevealed);
-setSelectedTiles(newSelected);
-setPatternScore((prev) => prev + tileScore);
-
-if (newSelected.length === 5) {
-  const isPerfectMatch = newSelected.every(
-    (selectedIndex, idx) => pattern[idx] === selectedIndex
-  );
-  if (isPerfectMatch) {
-    setPatternScore((prev) => prev + 50);
+  // 1. Base 10 points for any correct pattern tile
+  if (pattern.includes(index)) {
+    tileScore += 10;
   }
 
-  setTimeout(() => {
-    setGamePhase("enterWords");
-    setTimer(30);
-  }, 500);
-}
+  // 2. Extra 10 points if it's in the correct position in the sequence
+  if (pattern[position] === index) {
+    tileScore += 10;
+  }
+
+  setRevealed(newRevealed);
+  setSelectedTiles(newSelected);
+  setPatternScore((prev) => prev + tileScore);
+
+  if (newSelected.length === 5) {
+    const isPerfectMatch = newSelected.every(
+      (selectedIndex, idx) => pattern[idx] === selectedIndex
+    );
+    if (isPerfectMatch) {
+      setPatternScore((prev) => prev + 50);
+    }
+
+    setTimeout(() => {
+      setGamePhase("enterWords");
+      setTimer(30);
+    }, 500);
+  }
+};
 
     setRevealed(newRevealed);
     setSelectedTiles(newSelected);
