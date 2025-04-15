@@ -11,12 +11,12 @@ const VOWELS = ["A", "E", "I", "O", "U"];
 const RARE_LETTERS = ["Q", "X", "Z", "J", "K"];
 const BANNED_WORDS = [
   // Explicit vulgarities
-  "ASS", "ASSES", "ARSE", "DAMN", "DICK", "DICKS", "DICKHEAD",
+  "ASS", "ASSES", "ARSE", "DAMN", "DICK", "DICKS", "DICKING", "DICKHEAD",
   "FUCK", "FUCKS", "FUCKED", "FUCKER", "FUCKERS", "FUCKING",
   "SHIT", "SHITS", "SHITTING", "SHITTED",
   "PISS", "PISSED", "PISSING",
   "BITCH", "BITCHES", "BITCHY",
-  "CUNT", "CUNTS",
+  "CUNT", "CUNTS", "CUNTING",
   "TWAT", "TWATS",
   "HELL",
 
