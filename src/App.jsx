@@ -284,25 +284,28 @@ if (valid) {
   setWordInput("");
 };
 
-  const handleGameEnd = async () => {
-    const totalScore = patternScore + wordScore;
-    const currentMonth = new Date().toISOString().slice(0, 7);
+ const handleGameEnd = async () => {
+  setGamePhase("gameOver"); // ✅ Add this at the start of the function
 
-    const { error: insertError } = await supabase
-      .from("scores")
-      .insert([{ score: totalScore, month: currentMonth }]);
+  const totalScore = patternScore + wordScore;
+  const currentMonth = new Date().toISOString().slice(0, 7);
 
-    const { data: topScoresData, error: fetchError } = await supabase
-      .from("scores")
-      .select("score")
-      .eq("month", currentMonth)
-      .order("score", { ascending: false })
-      .limit(5);
+  const { error: insertError } = await supabase
+    .from("scores")
+    .insert([{ score: totalScore, month: currentMonth }]);
 
-    if (!fetchError && topScoresData) {
-      setTopScore(topScoresData);
-    }
-  };
+  const { data: topScoresData, error: fetchError } = await supabase
+    .from("scores")
+    .select("score")
+    .eq("month", currentMonth)
+    .order("score", { ascending: false })
+    .limit(5);
+
+  if (!fetchError && topScoresData) {
+    setTopScore(topScoresData);
+  }
+};
+
 
   return (
     <div style={{ fontFamily: "sans-serif", padding: "1rem", textAlign: "center" }}>
