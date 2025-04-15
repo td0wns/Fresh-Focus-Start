@@ -9,7 +9,15 @@ const supabase = createClient(
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const VOWELS = ["A", "E", "I", "O", "U"];
 const RARE_LETTERS = ["Q", "X", "Z", "J", "K"];
-const BANNED_WORDS = [/* ... banned words list remains unchanged ... */];
+const BANNED_WORDS = [
+  "ASS", "ARSE", "DAMN", "DICK", "FUCK", "SHIT", "PISS", "BITCH", "CUNT", "TWAT", "HELL",
+  "SEX", "SEXY", "HORNY", "PENIS", "VAGINA", "CLIT", "DILDO", "BJ", "BOOB", "BOOBS", "CUM",
+  "JIZZ", "RIMJOB", "HANDJOB", "BLOWJOB", "FELLATIO", "CUNNILINGUS", "GENITAL", "XXX", "ORGASM", "ANAL", "BDSM", "FAP", "NIPPLE",
+  "NIGGER", "NEGRO", "CHINK", "SPIC", "KIKE", "JUNGLEBUNNY", "TARBABY", "WETBACK", 
+  "FAGGOT", "FAG", "DYKE", "GOOK", "TRANNY", "HEEB", "GYPPY", "GYPO", "MUZZIE", "MUZZY", 
+  "ZIONIST", "ISLAMOPHOBE", "NAZI", "HONKEY", "BINT", "BOLLOCKS", "SLUT", 
+  "SKANK", "WHORE", "HO", "TRAMP", "HAG",
+];
 
 const GRID_SIZE = 5;
 const TOTAL_TILES = GRID_SIZE * GRID_SIZE;
@@ -55,6 +63,7 @@ function App({ gameStarted }) {
     const vowels = ["A", "E", "I", "O", "U"];
     const rareLetters = ["Q", "X", "Z", "J", "K"];
     const uncommonLetters = ["V", "B", "Y", "G", "P"];
+
     const result = Array(TOTAL_TILES).fill(null);
 
     const vowelPositions = [];
@@ -91,19 +100,33 @@ function App({ gameStarted }) {
   const getRandomPattern = (letters) => {
     const pattern = new Set();
     const usedLetters = new Set();
+
     const pos1Letters = ["A", "E", "I", "O", "U"];
     const pos23Letters = ["C", "D", "F", "H", "L", "M", "N", "R", "S", "T", "W"];
     const pos4Letters = [...pos23Letters, "P", "G", "Y", "B", "V"];
     const pos5Letters = [...pos4Letters, "K", "J", "X", "Q", "Z"];
 
-    const patternSlots = [pos1Letters, pos23Letters, pos23Letters, pos4Letters, pos5Letters];
+    const patternSlots = [
+      pos1Letters,
+      pos23Letters,
+      pos23Letters,
+      pos4Letters,
+      pos5Letters
+    ];
 
     const getValidIndex = (allowedLetters) => {
       const indices = letters
-        .map((l, i) => allowedLetters.includes(l) && !usedLetters.has(l) && ![...pattern].includes(i) ? i : null)
+        .map((l, i) =>
+          allowedLetters.includes(l) &&
+          !usedLetters.has(l) &&
+          ![...pattern].includes(i)
+            ? i
+            : null
+        )
         .filter((i) => i !== null);
       if (indices.length === 0) return null;
-      return indices[Math.floor(Math.random() * indices.length)];
+      const index = indices[Math.floor(Math.random() * indices.length)];
+      return index;
     };
 
     for (let i = 0; i < 5; i++) {
@@ -111,13 +134,14 @@ function App({ gameStarted }) {
       if (validIndex !== null) {
         pattern.add(validIndex);
         usedLetters.add(letters[validIndex]);
+      } else {
+        console.warn(`⚠️ Could not find valid letter for pattern slot ${i + 1}`);
       }
     }
 
     return Array.from(pattern);
   };
-
-  const startPatternAnimation = (patternArray) => {
+    const startPatternAnimation = (patternArray) => {
     let index = 0;
     const interval = setInterval(() => {
       if (index < patternArray.length) {
@@ -126,7 +150,9 @@ function App({ gameStarted }) {
         index++;
       } else {
         clearInterval(interval);
-        setTimeout(() => setGamePhase("selectTiles"), 500);
+        setTimeout(() => {
+          setGamePhase("selectTiles");
+        }, 500);
       }
     }, 800);
   };
@@ -158,6 +184,7 @@ function App({ gameStarted }) {
     const position = newSelected.length - 1;
 
     let tileScore = 0;
+
     if (pattern.includes(index)) tileScore += 10;
     if (pattern[position] === index) tileScore += 10;
 
@@ -166,8 +193,12 @@ function App({ gameStarted }) {
     setPatternScore((prev) => prev + tileScore);
 
     if (newSelected.length === 5) {
-      const isPerfectMatch = newSelected.every((selectedIndex, idx) => pattern[idx] === selectedIndex);
-      if (isPerfectMatch) setPatternScore((prev) => prev + 50);
+      const isPerfectMatch = newSelected.every(
+        (selectedIndex, idx) => pattern[idx] === selectedIndex
+      );
+      if (isPerfectMatch) {
+        setPatternScore((prev) => prev + 50);
+      }
 
       setTimeout(() => {
         setGamePhase("enterWords");
@@ -191,17 +222,21 @@ function App({ gameStarted }) {
       setFeedback("❌ Invalid or duplicate word.");
       return;
     }
+
     const patternLetters = selectedTiles.filter(i => pattern.includes(i)).map(i => letters[i]);
     const nonPatternLetters = selectedTiles.filter(i => !pattern.includes(i)).map(i => letters[i]);
     const usedPattern = [...new Set(raw.split("").filter(l => patternLetters.includes(l)))];
     const usedNonPattern = [...new Set(raw.split("").filter(l => nonPatternLetters.includes(l)))];
+
     if (usedPattern.length === 0 && usedNonPattern.length === 0) {
       setFeedback("❌ Word doesn't use any revealed letters.");
       return;
     }
+
     const valid = await isWordValid(raw);
     let score = usedPattern.length * 10 + usedNonPattern.length * 5;
     if (usedPattern.length === 5) score *= 2;
+
     setWords(prev => [...prev, { word: raw, valid, score }]);
     if (valid) setWordScore(prev => prev + score);
     setFeedback(valid ? `✅ "${raw}" accepted!` : "❌ Not a real word.");
@@ -212,14 +247,20 @@ function App({ gameStarted }) {
     const totalScore = patternScore + wordScore;
     const currentMonth = new Date().toISOString().slice(0, 7);
 
-    await supabase.from("scores").insert([{ score: totalScore, month: currentMonth }]);
-    const { data: topScoresData } = await supabase
+    const { error: insertError } = await supabase
+      .from("scores")
+      .insert([{ score: totalScore, month: currentMonth }]);
+
+    const { data: topScoresData, error: fetchError } = await supabase
       .from("scores")
       .select("score")
       .eq("month", currentMonth)
       .order("score", { ascending: false })
       .limit(5);
-    setTopScore(topScoresData || []);
+
+    if (!fetchError && topScoresData) {
+      setTopScore(topScoresData);
+    }
   };
 
   return (
@@ -234,11 +275,37 @@ function App({ gameStarted }) {
             const isPattern = pattern.includes(idx);
             const backgroundColor = isFlashing ? "#fff" : isRevealed ? (isPattern ? "#84dade" : "#ddd") : "#786daa";
             const color = isRevealed || isFlashing ? "#000" : "#fff";
-
             return (
               <div
                 key={idx}
                 onClick={() => handleTileClick(idx)}
+                style={{ backgroundColor, color, width: 60, height: 60, display: "flex", justifyContent: "center", alignItems: "center", fontSize: 20, borderRadius: 8, cursor: "pointer" }}
+              >
+                {isRevealed || isFlashing ? letter : ""}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 60px)", gap: "0.5rem" }}>
+          {[0, 1, 2, 3, 4].map((i) => {
+            const tileIndex = selectedTiles[i];
+            const letter = tileIndex !== undefined ? letters[tileIndex] : "";
+            const isPattern = pattern.includes(tileIndex);
+            const isSelected = tileIndex !== undefined;
+
+            const backgroundColor = isSelected
+              ? isPattern
+                ? "#84dade"
+                : "#ddd"
+              : "#000";
+            const color = isSelected ? "#000" : "#fff";
+
+            return (
+              <div
+                key={i}
                 style={{
                   backgroundColor,
                   color,
@@ -248,11 +315,10 @@ function App({ gameStarted }) {
                   justifyContent: "center",
                   alignItems: "center",
                   fontSize: 20,
-                  borderRadius: 8,
-                  cursor: "pointer"
+                  borderRadius: 8
                 }}
               >
-                {isRevealed || isFlashing ? letter : ""}
+                {letter}
               </div>
             );
           })}
@@ -275,11 +341,7 @@ function App({ gameStarted }) {
               value={wordInput}
               onChange={(e) => setWordInput(e.target.value)}
               placeholder="Enter a word"
-              style={{
-                padding: "0.5rem",
-                width: "200px",
-                fontSize: "16px"
-              }}
+              style={{ padding: "0.5rem", width: "200px", fontSize: "16px" }}
             />
             <button type="submit" style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
               Submit
@@ -298,6 +360,7 @@ function App({ gameStarted }) {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
           <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "1rem", maxWidth: "500px", textAlign: "left" }}>
             <h2 style={{ textAlign: "center", color: "#786daa", marginBottom: "1rem" }}>Well done!</h2>
+            <p><strong>Scoring system:</strong></p>
             <ul style={{ paddingLeft: "1.2rem" }}>
               <li>Each correct pattern tile: 10 pts + 10 bonus if in correct order.</li>
               <li>Words: 10 pts for each pattern letter, 5 pts for other revealed letters.</li>
@@ -314,22 +377,7 @@ function App({ gameStarted }) {
                 </ol>
               </>
             )}
-            <button
-              onClick={() => window.location.reload()}
-              style={{
-                marginTop: "1rem",
-                width: "100%",
-                padding: "0.75rem",
-                backgroundColor: "#84dade",
-                color: "white",
-                border: "none",
-                borderRadius: "0.5rem",
-                fontWeight: "bold",
-                fontSize: "1rem"
-              }}
-            >
-              Start New Game
-            </button>
+            <button onClick={() => window.location.reload()} style={{ marginTop: "1rem", width: "100%", padding: "0.75rem", backgroundColor: "#84dade", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", fontSize: "1rem" }}>Start New Game</button>
           </div>
         </div>
       )}
