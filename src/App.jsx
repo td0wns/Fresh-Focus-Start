@@ -219,7 +219,6 @@ if (newSelected.length === 5) {
   }, 500);
 }
 
-
     setRevealed(newRevealed);
     setSelectedTiles(newSelected);
     setPatternScore((prev) => prev + tileScore);
