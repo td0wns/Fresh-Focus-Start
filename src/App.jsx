@@ -332,26 +332,27 @@ const handleTileClick = (index) => {
       const color = isSelected ? "#000" : "#fff";
 
       return (
-        <div
-          key={i}
-          style={{
-            backgroundColor,
-            color,
-            width: 60,
-            height: 60,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: 20,
-            borderRadius: 8
-          }}
-        >
-          {letter}
-        </div>
-      );
-    })}
+  <div>
+    {letters.map((letter, i) => (
+      <div
+        key={i}
+        style={{
+          backgroundColor,
+          color,
+          width: 60,
+          height: 60,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: 20,
+          borderRadius: 8
+        }}
+      >
+        {letter}
+      </div>
+    ))}
   </div>
-</div>
+);
 
       {gamePhase === "enterWords" && (
         <>
