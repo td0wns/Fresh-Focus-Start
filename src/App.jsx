@@ -183,17 +183,18 @@ setTopScore([]); // reset top scores as an empty array
 
   const newRevealed = [...revealed];
   newRevealed[index] = true;
+
   const newSelected = [...selectedTiles, index];
   const position = newSelected.length - 1;
 
   let tileScore = 0;
 
-  // 1. Base score: +10 if this tile is in the pattern (any order)
+  // 1. Base score: +10 if this tile is in the pattern
   if (pattern.includes(index)) {
     tileScore += 10;
   }
 
-  // 2. Sequence bonus: +10 if tile is at correct position
+  // 2. Bonus: +10 if this tile is in the correct position
   if (pattern[position] === index) {
     tileScore += 10;
   }
@@ -202,11 +203,12 @@ setTopScore([]); // reset top scores as an empty array
   setSelectedTiles(newSelected);
   setPatternScore((prev) => prev + tileScore);
 
-  // 3. Perfect pattern match bonus
+  // 3. Bonus: +50 if the selected pattern exactly matches
   if (newSelected.length === 5) {
     const isPerfectMatch = newSelected.every(
       (selectedIndex, idx) => pattern[idx] === selectedIndex
     );
+
     if (isPerfectMatch) {
       setPatternScore((prev) => prev + 50);
     }
