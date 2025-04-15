@@ -102,33 +102,44 @@ const [topScore, setTopScore] = useState([]); // now it's a list
 
 const getRandomPattern = (letters) => {
   const pattern = new Set();
-  const letterCounts = {};
+  const usedLetters = new Set();
 
-  const vowels = ["A", "E", "I", "O", "U"];
-  const vowelIndices = letters
-    .map((l, i) => (vowels.includes(l) ? i : null))
-    .filter((i) => i !== null);
+  const pos1Letters = ["A", "E", "I", "O", "U"];
+  const pos23Letters = ["C", "D", "F", "H", "L", "M", "N", "R", "S", "T", "W"];
+  const pos4Letters = [...pos23Letters, "P", "G", "Y", "B", "V"];
+  const pos5Letters = [...pos4Letters, "K", "J", "X", "Q", "Z"];
 
-  const nonVowelIndices = letters
-    .map((l, i) => (!vowels.includes(l) ? i : null))
-    .filter((i) => i !== null);
+  const patternSlots = [
+    pos1Letters,
+    pos23Letters,
+    pos23Letters,
+    pos4Letters,
+    pos5Letters
+  ];
 
-  // Step 1: Always include exactly one vowel
-  const vowelIndex = vowelIndices[Math.floor(Math.random() * vowelIndices.length)];
-  const vowelLetter = letters[vowelIndex];
-  pattern.add(vowelIndex);
-  letterCounts[vowelLetter] = 1;
+  const getValidIndex = (allowedLetters) => {
+    const indices = letters
+      .map((l, i) =>
+        allowedLetters.includes(l) &&
+        !usedLetters.has(l) &&
+        ![...pattern].includes(i)
+          ? i
+          : null
+      )
+      .filter((i) => i !== null);
+    if (indices.length === 0) return null;
+    const index = indices[Math.floor(Math.random() * indices.length)];
+    return index;
+  };
 
-  // Step 2: Fill remaining pattern tiles from non-vowels only
-  while (pattern.size < 5) {
-    const index = nonVowelIndices[Math.floor(Math.random() * nonVowelIndices.length)];
-    const letter = letters[index];
-
-    if (pattern.has(index)) continue;
-    if ((letterCounts[letter] || 0) >= 2) continue;
-
-    pattern.add(index);
-    letterCounts[letter] = (letterCounts[letter] || 0) + 1;
+  for (let i = 0; i < 5; i++) {
+    const validIndex = getValidIndex(patternSlots[i]);
+    if (validIndex !== null) {
+      pattern.add(validIndex);
+      usedLetters.add(letters[validIndex]);
+    } else {
+      console.warn(`⚠️ Could not find valid letter for pattern slot ${i + 1}`);
+    }
   }
 
   return Array.from(pattern);
