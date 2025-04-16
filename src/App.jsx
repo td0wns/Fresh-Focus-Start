@@ -51,6 +51,7 @@ function App({ gameStarted }) {
   const [topScore, setTopScore] = useState([]);
   const inputRef = useRef(null);
   const [feedback, setFeedback] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (gameStarted) initializeGame();
