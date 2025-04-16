@@ -231,9 +231,13 @@ function App({ gameStarted }) {
   };
 
   const handleWordSubmit = async () => {
+  if (isSubmitting) return; // 🚫 Prevent rapid repeat submissions
+  setIsSubmitting(true);    // 🔒 Lock the button
+
   const raw = wordInput.trim().toUpperCase();
   if (!raw || BANNED_WORDS.includes(raw) || words.some(w => w.word === raw)) {
     setFeedback("❌ Invalid or duplicate word.");
+    setIsSubmitting(false); // 🔓 Unlock if rejected early
     return;
   }
 
@@ -248,7 +252,6 @@ function App({ gameStarted }) {
     const isPattern = patternLetters.includes(l);
     const isSelected = selectedLetters.includes(l);
 
-    // Base scoring
     if (isPattern) {
       baseScore += 10;
       patternUsedCount++;
@@ -256,7 +259,6 @@ function App({ gameStarted }) {
       baseScore += 5;
     }
 
-    // Bonus scoring
     if (["P", "G", "Y", "B", "V"].includes(l) && isSelected) {
       baseScore += 5;
     }
@@ -265,13 +267,9 @@ function App({ gameStarted }) {
     }
   }
 
-  // Apply multiplier based on number of pattern letters used
-  let multiplier = 1;
-  if (patternUsedCount >= 2) {
-    multiplier = patternUsedCount; // x2 for 2, x3 for 3, etc.
-  }
-
-  const totalScore = baseScore * multiplier;
+  let multiplier = patternUsedCount >= 2 ? patternUsedCount : 1;
+  let totalScore = baseScore * multiplier;
+  if (totalScore > 500) totalScore = 500; // 🧢 Cap per-word score at 500
 
   const valid = await isWordValid(raw);
   if (valid) {
@@ -281,6 +279,7 @@ function App({ gameStarted }) {
 
   setFeedback(valid ? `✅ "${raw}" accepted!` : "❌ Not a real word.");
   setWordInput("");
+  setIsSubmitting(false); // 🔓 Unlock after all is done
 };
 
  const handleGameEnd = async () => {
@@ -387,7 +386,16 @@ function App({ gameStarted }) {
   placeholder="Enter a word"
   style={{ padding: "0.5rem", width: "200px", fontSize: "16px" }}
 />
-            <button type="submit" style={{ marginLeft: "1rem", padding: "0.5rem 1rem" }}>
+<button
+  type="submit"
+  disabled={isSubmitting}
+  style={{
+    marginLeft: "1rem",
+    padding: "0.5rem 1rem",
+    opacity: isSubmitting ? 0.6 : 1,
+    cursor: isSubmitting ? "not-allowed" : "pointer"
+  }}
+>
               Submit
             </button>
           </form>
